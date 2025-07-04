@@ -33,6 +33,7 @@ export default function Index() {
                 <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
+                    placeholder={"Enter amount"}
                 />
             </View>
 
@@ -47,6 +48,7 @@ export default function Index() {
                 <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
+                    placeholder={"Enter amount"}
                 />
             </View>
 
@@ -60,6 +62,7 @@ export default function Index() {
                 <TextInput
                     style={styles.textInput}
                     keyboardType={"numeric"}
+                    placeholder={"Enter amount"}
                 />
             </View>
 
@@ -73,17 +76,21 @@ export default function Index() {
                 <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
+                    placeholder={"Enter amount"}
                 />
             </View>
 
             <View style={styles.excangeRateTabdle}>
                 <View style={styles.excangeRateTableHeader}>
-                    <Text style={{fontSize: 19, fontWeight: "bold"}}>Exchange Rates</Text>
+                    <Text style={{fontSize: 19, fontWeight: "bold", color: "#4C4C4C"}}>Exchange Rates</Text>
                 </View>
                 <View style={styles.placeExchangeRateTableTablet}>
-                    <Table style={styles.table} borderStyle={{borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}>
-                        <Row data={["", "Buying", "Selling", "UAH"]} textStyle={{fontSize: 18, fontWeight: "semibold"}} style={{marginBottom: -1}}/>
-                        <Rows data={[["USD", "40.90", "41.32", ""], ["EUR", "44.88", "45.44", ""], ["MDL", "2.5", "2.4", ""]]} textStyle={{fontSize: 18, fontWeight: "regular"}} style={{marginBottom:11, marginTop: 11}}/>
+                    <Table borderStyle={{borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}>
+                        <Row data={["", "Buying", "Selling", "UAH"]} textStyle={{fontSize: 18, fontWeight: "semibold", color: "#4C4C4C"}} style={{marginBottom: 2}}/>
+                        {/*<Rows data={[["USD", "40.90", "41.32", ""], ["EUR", "44.88", "45.44", ""], ["MDL", "2.5", "2.4", ""]]} textStyle={{fontSize: 18, fontWeight: "regular"}} style={{marginBottom:11, marginTop: 11}}/>*/}
+                        <Rows data={[["USD", "40.9", "41.32", ""]]} textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
+                        <Rows data={[["EUR", "40.9", "41.32", ""]]} textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{paddingTop: 10, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
+                        <Rows data={[["MDL", "40.9", "41.32", ""]]} textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{paddingTop: 10, marginBottom: 36}}/>
                     </Table>
                 </View>
             </View>
@@ -125,7 +132,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     valueButtonText: {
-        fontSize: 18,
+        fontSize: 18
     },
     textInput: {
         backgroundColor: "#EFEFEF",
@@ -137,7 +144,7 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 10,
         borderTopRightRadius: 10,
         fontSize: 18,
-        paddingLeft: 16,
+        paddingLeft: 10,
     },
     excangeRateTabdle: {
         backgroundColor: "#EFEFEF",
@@ -153,7 +160,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    table: {
+    text: {
+        color: "#4C4C4C",
     },
     placeExchangeRateTableTablet: {
         justifyContent: "center",
