@@ -1,7 +1,8 @@
 import {FlatList, View, Text, StyleSheet} from 'react-native';
 import {Link, Stack, useLocalSearchParams} from "expo-router";
+import {changeValue} from "../sevices/cacheService";
 
-const currencies = require("../assets/currencies.json");
+const currencies = require("../../assets/currencies.json");
 
 export default function ValPicker() {
     const {ID} = useLocalSearchParams();
@@ -12,13 +13,9 @@ export default function ValPicker() {
         backgroundColor: "white",
         justifyContent: "center"
     }}>
-        <Stack.Screen options={{
-            title: "Change Value",
-            headerTitleAlign: "center",
-        }}/>
 
         <FlatList data={currencies} renderItem={({item}) => (
-            <Link dismissTo href={`/?ID=${ID}&code=${item.code}`}>
+            <Link onPress={() => changeValue(ID, item.code)} dismissTo href={"/pages"}>
                 <View style={styles.item}>
                     <View style={styles.fullNamePart}>
                         <Text style={styles.itemText}>{item.fullName}</Text>
@@ -29,12 +26,11 @@ export default function ValPicker() {
                 </View>
             </Link>
 
-        )}
-                  style={
-                      {
-                          marginBottom: 12
-                      }
-                  }
+        )} style={
+            {
+                marginBottom: 12
+            }
+        }
         />
     </View>)
         ;

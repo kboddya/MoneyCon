@@ -1,7 +1,9 @@
 import {Link, Stack} from 'expo-router';
 import {Text, View, StyleSheet, TextInput} from 'react-native';
+import {setApiKey, getApiKey} from "@/app/sevices/cacheService";
+import React, {useEffect, useState} from "react";
 
-export default function apiKeySettings() {
+export default function ApiKeySettings() {
     return (
         <View
             style={{
@@ -9,21 +11,22 @@ export default function apiKeySettings() {
                 alignItems: "center",
                 backgroundColor: "white",
             }}>
-            <Stack.Screen options={{
-                title: "Settings",
-                headerTitleAlign: "center",
-            }}>
-            </Stack.Screen>
             <View style={styles.inputContainer}>
                 <TextInput
                     style={{paddingLeft: 10, fontSize: 18}}
-                    placeholder="Enter your API key here"
+                    placeholder={"Enter your API key here"}
                     keyboardType="default"
+                    onSubmitEditing={e => {
+                        if (!setApiKey(e.nativeEvent.text)) {
+                            alert("Invalid API key. Please try again.");
+                        }
+                    }}
                 />
             </View>
 
             <Text style={{marginTop: 10, color: "#4C4C4C"}}>
-                You can get your API key from <Link href={"https://exchangeratesapi.io/"} style={{color: "blue"}}>exchangerates</Link>
+                You can get your API key from <Link href={"https://exchangeratesapi.io/"}
+                                                    style={{color: "blue"}}>exchangerates</Link>
             </Text>
         </View>
     );

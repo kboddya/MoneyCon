@@ -1,35 +1,38 @@
 import {Text, View, StyleSheet, TextInput} from "react-native";
 import {Link, Stack, useLocalSearchParams} from "expo-router";
-import {Image} from "expo-image";
 import {Table, Row, Rows} from "react-native-table-component";
+import {getValue} from "@/app/sevices/cacheService";
+import React, {useEffect, useState} from "react";
 
 export default function Index() {
-    const {ID, code} = useLocalSearchParams();
+    const [values, setValues] = useState({
+        firstVal: "",
+        secondVal: "",
+        thirdVal: "",
+        fourthVal: "",
+    });
+
+    useEffect(() => {
+        getValue().then(setValues);
+    })
+
     return (
         <View
             style={{
                 flex: 1,
                 alignItems: "center",
                 backgroundColor: "white",
-            }}>
-            <Stack.Screen
-                options={{
-                    title: "MoneyCon",
-                    headerTitleAlign: "center",
-                    headerRight: () => <Link href={"/apiKeySettings"}><Image
-                        style={styles.settingsButton}
-                        source={require("../assets/images/Settings.svg")}
-                    /></Link>,
-                }}>
+            }}
+        >
 
-            </Stack.Screen>
             <Text style={styles.updated}>Updated: now</Text>
             <View style={styles.textBoxAndValPicker}>
                 <View style={styles.valuePicker}>
-                    <View style={styles.valueButton}>
-                        <Link href={"/ValPicker?ID=1"} style={styles.valueButton}><Text
-                            style={styles.valueButtonText}>{code ?? "UAH"}</Text></Link>
-                    </View>
+                    <Link href={"/pages/ValPicker?ID=1"} style={styles.valueButton}>
+                        <View style={styles.valueButton}><Text
+                            style={styles.valueButtonText}>{values.firstVal ?? "?"}</Text>
+                        </View>
+                    </Link>
                 </View>
                 <TextInput
                     style={styles.textInput}
@@ -41,10 +44,11 @@ export default function Index() {
 
             <View style={styles.textBoxAndValPicker}>
                 <View style={styles.valuePicker}>
-                    <View style={styles.valueButton}>
-                        <Link href={"/ValPicker?ID=2"} style={styles.valueButton}><Text
-                            style={styles.valueButtonText}>USD</Text></Link>
-                    </View>
+                    <Link href={"/pages/ValPicker?ID=2"} style={styles.valueButton}>
+                        <View style={styles.valueButton}><Text
+                            style={styles.valueButtonText}>{values.secondVal ?? "?"}</Text>
+                        </View>
+                    </Link>
                 </View>
                 <TextInput
                     style={styles.textInput}
@@ -55,10 +59,12 @@ export default function Index() {
 
             <View style={styles.textBoxAndValPicker}>
                 <View style={styles.valuePicker}>
-                    <View style={styles.valueButton}>
-                        <Link href={"/ValPicker?ID=3"} style={styles.valueButton}><Text
-                            style={styles.valueButtonText}>EUR</Text></Link>
-                    </View>
+                    <Link href={"/pages/ValPicker?ID=3"} style={styles.valueButton}>
+                        <View style={styles.valueButton}>
+                            <Text
+                                style={styles.valueButtonText}>{values.thirdVal ?? "?"}</Text>
+                        </View>
+                    </Link>
                 </View>
                 <TextInput
                     style={styles.textInput}
@@ -69,10 +75,12 @@ export default function Index() {
 
             <View style={styles.textBoxAndValPicker}>
                 <View style={styles.valuePicker}>
-                    <View style={styles.valueButton}>
-                        <Link href={"/ValPicker?ID=4"} style={styles.valueButton}><Text
-                            style={styles.valueButtonText}>MDL</Text></Link>
-                    </View>
+                    <Link href={"/pages/ValPicker?ID=4"} style={styles.valueButton}>
+                        <View style={styles.valueButton}>
+                            <Text
+                                style={styles.valueButtonText}>{values.fourthVal ?? "?"}</Text>
+                        </View>
+                    </Link>
                 </View>
                 <TextInput
                     style={styles.textInput}
@@ -87,10 +95,22 @@ export default function Index() {
                 </View>
                 <View style={styles.placeExchangeRateTableTablet}>
                     <Table borderStyle={{borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}>
-                        <Row data={["", "Buying", "Selling", "UAH"]} textStyle={{fontSize: 18, fontWeight: "semibold", color: "#4C4C4C"}} style={{marginBottom: 2}}/>
-                        <Rows data={[["USD", "40.9", "41.32", ""]]} textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
-                        <Rows data={[["EUR", "40.9", "41.32", ""]]} textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{paddingTop: 10, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
-                        <Rows data={[["MDL", "40.9", "41.32", ""]]} textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{paddingTop: 10, marginBottom: 36}}/>
+                        <Row data={["", "Buying", "Selling", values.firstVal]}
+                             textStyle={{fontSize: 18, fontWeight: "semibold", color: "#4C4C4C"}}
+                             style={{marginBottom: 2}}/>
+                        <Rows data={[[values.secondVal, "40.9", "41.32", ""]]}
+                              textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
+                              style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
+                        <Rows data={[[values.thirdVal, "40.9", "41.32", ""]]}
+                              textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{
+                            paddingTop: 10,
+                            paddingBottom: 10,
+                            borderBottomWidth: 1,
+                            borderBottomColor: "#DDDDDD"
+                        }}/>
+                        <Rows data={[[values.fourthVal, "40.9", "41.32", ""]]}
+                              textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
+                              style={{paddingTop: 10, marginBottom: 36}}/>
                     </Table>
                 </View>
             </View>
@@ -105,10 +125,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginTop: 10,
         marginBottom: 11,
-    },
-    settingsButton: {
-        width: 25,
-        height: 25,
     },
     textBoxAndValPicker: {
         flexDirection: "row",
