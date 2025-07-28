@@ -2,6 +2,12 @@ import {Link, Stack} from "expo-router";
 import {View, Text} from "react-native";
 import {Image} from "expo-image";
 
+export const unstable_settings = {
+    initialRouteName: "/pages", // Set the initial route to the index page
+    // Ensure that the app is always in dark mode
+    appearance: "light",
+}
+
 export default function RootLayout() {
     return (
         <Stack>
@@ -12,15 +18,15 @@ export default function RootLayout() {
                         width: 25,
                         height: 25,
                     }}
-                    source={require("../../assets/images/Settings.svg")}
+                    source={require("../assets/images/Settings.svg")}
                 /></Link>,
                 headerTitleAlign: "center"
             }}/>
-            <Stack.Screen name={"ApiKeySettings"} options={{
+            <Stack.Screen name={"pages/ApiKeySettings"} options={{
                 title: "Settings",
                 headerTitleAlign: "center"
             }}/>
-            <Stack.Screen name={"ValPicker"} options={{
+            <Stack.Screen name={"pages/ValPicker"} options={{
                 title: "Change Value",
                 headerTitleAlign: "center"
             }}/>

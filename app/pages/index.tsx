@@ -1,8 +1,13 @@
-import {Text, View, StyleSheet, TextInput} from "react-native";
-import {Link, Stack, useLocalSearchParams} from "expo-router";
+import {Text, View, StyleSheet, TextInput, Alert} from "react-native";
+import {Link, Redirect, router, Stack, useLocalSearchParams} from "expo-router";
 import {Table, Row, Rows} from "react-native-table-component";
-import {getValue} from "@/app/sevices/cacheService";
+import {getValue, getTime, getApiKey} from "@/app/sevices/cacheService";
+import {updateData} from "@/app/sevices/apiService";
 import React, {useEffect, useState} from "react";
+import {calculate, exchangeRateTable} from "@/app/sevices/calcService";
+import {calcData} from "@/app/entities/calcData";
+import {errorDescription} from "@/app/sevices/helper";
+import {Toast} from "toastify-react-native";
 
 export default function Index() {
     const [values, setValues] = useState({
@@ -12,9 +17,37 @@ export default function Index() {
         fourthVal: "",
     });
 
-    useEffect(() => {
-        getValue().then(setValues);
+    const [table, setTable] = useState({
+        secondVal: "",
+        thirdVal: "",
+        fourthVal: "",
+    });
+
+    const [data, setData] = useState({
+        firstData: "",
+        secondData: "",
+        thirdData: "",
+        fourthData: "",
     })
+
+    const [time, setTime] = useState("");
+
+    const res = updateData().then(async d => {
+        if (d !== true && typeof d === "string") {
+            if (!d.includes("101") && !d.includes(" 1000")) await Alert.alert("Update failed", errorDescription(d));
+            else if (d.includes(" 1000")) Toast.info("The data is out of date")
+            else if (d.includes("101")) router.replace("/pages/ApiKeySettings")
+        }
+    });
+
+    getValue().then(setValues)
+
+    getTime().then(setTime);
+
+    exchangeRateTable().then(data => {
+            setTable(data ?? {secondVal: "?", thirdVal: "?", fourthVal: "?"});
+        }
+    )
 
     return (
         <View
@@ -25,7 +58,9 @@ export default function Index() {
             }}
         >
 
-            <Text style={styles.updated}>Updated: now</Text>
+            <Text
+                style={styles.updated}>Updated: {time ? new Date(Date.now()).getHours() - new Date(time).getHours() : "?"} hours
+                ago</Text>
             <View style={styles.textBoxAndValPicker}>
                 <View style={styles.valuePicker}>
                     <Link href={"/pages/ValPicker?ID=1"} style={styles.valueButton}>
@@ -38,6 +73,27 @@ export default function Index() {
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
+                    value={data.firstData != "NaN" ? data.firstData : ""}
+                    onChangeText={text => {
+                        setData({
+                            firstData: text,
+                            secondData: data.secondData,
+                            thirdData: data.thirdData,
+                            fourthData: data.fourthData,
+                        });
+                        calculate(new calcData(values, text, 1)).then(d => {
+                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            else {
+                                setData({
+                                    firstData: d.firstData,
+                                    secondData: d.secondData,
+                                    thirdData: d.thirdData,
+                                    fourthData: d.fourthData,
+                                });
+                            }
+                        });
+                    }}
+
                 />
             </View>
 
@@ -54,6 +110,26 @@ export default function Index() {
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
+                    value={data.secondData != "NaN" ? data.secondData : ""}
+                    onChangeText={text => {
+                        setData({
+                            firstData: data.firstData,
+                            secondData: text,
+                            thirdData: data.thirdData,
+                            fourthData: data.fourthData,
+                        });
+                        calculate(new calcData(values, text, 2)).then(d => {
+                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            else {
+                                setData({
+                                    firstData: d.firstData,
+                                    secondData: d.secondData,
+                                    thirdData: d.thirdData,
+                                    fourthData: d.fourthData,
+                                });
+                            }
+                        });
+                    }}
                 />
             </View>
 
@@ -70,6 +146,26 @@ export default function Index() {
                     style={styles.textInput}
                     keyboardType={"numeric"}
                     placeholder={"Enter amount"}
+                    value={data.thirdData != "NaN" ? data.thirdData : ""}
+                    onChangeText={text => {
+                        setData({
+                            firstData: data.firstData,
+                            secondData: data.secondData,
+                            thirdData: text,
+                            fourthData: data.fourthData,
+                        });
+                        calculate(new calcData(values, text, 3)).then(d => {
+                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            else {
+                                setData({
+                                    firstData: d.firstData,
+                                    secondData: d.secondData,
+                                    thirdData: d.thirdData,
+                                    fourthData: d.fourthData,
+                                });
+                            }
+                        });
+                    }}
                 />
             </View>
 
@@ -86,6 +182,26 @@ export default function Index() {
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
+                    value={data.fourthData != "NaN" ? data.fourthData : ""}
+                    onChangeText={text => {
+                        setData({
+                            firstData: data.firstData,
+                            secondData: data.secondData,
+                            thirdData: data.thirdData,
+                            fourthData: text,
+                        });
+                        calculate(new calcData(values, text, 4)).then(d => {
+                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            else {
+                                setData({
+                                    firstData: d.firstData,
+                                    secondData: d.secondData,
+                                    thirdData: d.thirdData,
+                                    fourthData: d.fourthData,
+                                });
+                            }
+                        });
+                    }}
                 />
             </View>
 
@@ -98,19 +214,22 @@ export default function Index() {
                         <Row data={["", "Buying", "Selling", values.firstVal]}
                              textStyle={{fontSize: 18, fontWeight: "semibold", color: "#4C4C4C"}}
                              style={{marginBottom: 2}}/>
-                        <Rows data={[[values.secondVal, "40.9", "41.32", ""]]}
-                              textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
-                              style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
-                        <Rows data={[[values.thirdVal, "40.9", "41.32", ""]]}
-                              textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{
+                        <Rows
+                            data={[[values.secondVal, table.secondVal, table.secondVal != "?" ? ((Number.parseFloat(table.secondVal) * 101) / 100).toFixed(2) : "?", ""]]}
+                            textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
+                            style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
+                        <Rows
+                            data={[[values.thirdVal, table.thirdVal, table.thirdVal != "?" ? ((Number.parseFloat(table.thirdVal) * 101) / 100).toFixed(2) : "?", ""]]}
+                            textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{
                             paddingTop: 10,
                             paddingBottom: 10,
                             borderBottomWidth: 1,
                             borderBottomColor: "#DDDDDD"
                         }}/>
-                        <Rows data={[[values.fourthVal, "40.9", "41.32", ""]]}
-                              textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
-                              style={{paddingTop: 10, marginBottom: 36}}/>
+                        <Rows
+                            data={[[values.fourthVal, table.fourthVal, table.fourthVal != "?" ? ((Number.parseFloat(table.fourthVal) * 101) / 100).toFixed(2) : "?", ""]]}
+                            textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
+                            style={{paddingTop: 10, marginBottom: 36}}/>
                     </Table>
                 </View>
             </View>

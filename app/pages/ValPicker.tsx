@@ -1,11 +1,15 @@
 import {FlatList, View, Text, StyleSheet} from 'react-native';
 import {Link, Stack, useLocalSearchParams} from "expo-router";
+import {getSymbols} from "../sevices/cacheService";
 import {changeValue} from "../sevices/cacheService";
+import {useEffect, useState} from "react";
 
 const currencies = require("../../assets/currencies.json");
 
 export default function ValPicker() {
+
     const {ID} = useLocalSearchParams();
+
 
     return (<View style={{
         flex: 1,
@@ -32,6 +36,7 @@ export default function ValPicker() {
             }
         }
         />
+
     </View>)
         ;
 }
