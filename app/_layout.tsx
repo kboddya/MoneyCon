@@ -1,6 +1,11 @@
-import {Link, Stack} from "expo-router";
-import {View, Text} from "react-native";
+import {Link, router, Stack} from "expo-router";
+import {Alert} from "react-native";
+import {updateData} from "@/app/sevices/apiService";
 import {Image} from "expo-image";
+import {Toast} from "toastify-react-native";
+import {errorDescription} from "@/app/sevices/helper";
+import ToastManager from "toastify-react-native/components/ToastManager";
+import {dismissTo} from "expo-router/build/global-state/routing";
 
 export const unstable_settings = {
     initialRouteName: "/pages", // Set the initial route to the index page
@@ -17,6 +22,7 @@ export default function RootLayout() {
                     style={{
                         width: 25,
                         height: 25,
+                        padding: 14
                     }}
                     source={require("../assets/images/Settings.svg")}
                 /></Link>,
@@ -24,7 +30,24 @@ export default function RootLayout() {
             }}/>
             <Stack.Screen name={"pages/ApiKeySettings"} options={{
                 title: "Settings",
-                headerTitleAlign: "center"
+                headerTitleAlign: "center",
+                headerRight: () =>
+                    <Image style={{width: 20, height: 20, padding: 11}}
+                           source={require("../assets/images/reload.png")}
+                           onTouchEnd={event => {
+                               updateData(true).then(data => {
+                                   if (data === true) {
+                                        Toast.show({
+                                            text1: "Data updated successfully",
+                                            type: "success",
+                                            visibilityTime: 3000
+                                        });
+                                       dismissTo("/");
+                                   } else if (typeof data === "string") {
+                                       Alert.alert("Error updating data", errorDescription(data));
+                                   }
+                               })
+                           }}/>
             }}/>
             <Stack.Screen name={"pages/ValPicker"} options={{
                 title: "Change Value",

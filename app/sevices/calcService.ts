@@ -1,4 +1,4 @@
-import {getExchangeRates, getValue} from "@/app/sevices/cacheService";
+import {getExchangeRates, getHistorycalExchangeRates, getValue} from "@/app/sevices/cacheService";
 import {calcData} from "@/app/entities/calcData";
 
 export const calculate = async (data: calcData) => {
@@ -12,12 +12,6 @@ export const calculate = async (data: calcData) => {
         fourthVal: rates?.rates[data.val.fourthVal] ?? 1,
     }
 
-
-
-    console.log(data.firstData)
-    console.log(data.secondData)
-    console.log(data.thirdData)
-    console.log(data.fourthData)
     switch (data.enterVal) {
         case 1: {
             const convertedToBase = (Number.parseFloat(data.firstData) / excnageRates.firstVal)
@@ -54,15 +48,33 @@ export const calculate = async (data: calcData) => {
 }
 
 export const exchangeRateTable = async () => {
-    return getExchangeRates().then(data => {
-    if (data?.rates == null) return null;
-        return getValue().then(value => {
-            return {
-                secondVal: (1 / (data?.rates[value.secondVal] ?? 1) * (data?.rates[value.firstVal] ?? 1)).toFixed(2),
-                thirdVal: (1 / (data?.rates[value.thirdVal] ?? 1) * (data?.rates[value.firstVal] ?? 1)).toFixed(2),
-                fourthVal: (1 / (data?.rates[value.fourthVal] ?? 1) * (data?.rates[value.firstVal] ?? 1)).toFixed(2),
-            }
+    return getExchangeRates().then(async currentDate => {
+        if (currentDate?.rates == null) return null;
+        return getHistorycalExchangeRates().then(historyData => {
+            if (historyData?.rates == null) return null;
+            const historyRates = JSON.parse(historyData?.rates);
+            return getValue().then(values => {
+                const calculateValues = (data: any, value: string) => {
+                    return (1 / (data?.rates[value] ?? JSON.parse(data)?.rates[value] ?? 1) * (data?.rates[values.firstVal] ?? JSON.parse(data)?.rates[values.firstVal]  ?? 1));
+                }
+                console.log(calculateValues(currentDate, values.thirdVal).toFixed(2) + " " + calculateValues(historyRates, values.thirdVal).toFixed(2));
+                return {
+                    secondVal: {
+                        currentVal: calculateValues(currentDate, values.secondVal).toFixed(2),
+                        percentVal: (100 - (100 * (calculateValues(historyRates, values.secondVal) / calculateValues(currentDate, values.secondVal)))).toFixed(2) + "%"
+                    },
+                    thirdVal: {
+                        currentVal: (1 / (currentDate?.rates[values.thirdVal] ?? 1) * (currentDate?.rates[values.firstVal] ?? 1)).toFixed(2),
+                        percentVal: (((100 * (1 / (historyData?.rates[values.thirdVal] ?? 1) * (historyData?.rates[values.firstVal] ?? 1)) /
+                            (1 / (currentDate?.rates[values.thirdVal] ?? 1) * (currentDate?.rates[values.firstVal] ?? 1))) - 100).toFixed(2) + "%")
+                    },
+                    fourthVal: {
+                        currentVal: (1 / (currentDate?.rates[values.fourthVal] ?? 1) * (currentDate?.rates[values.firstVal] ?? 1)).toFixed(2),
+                        percentVal: (((100 * (1 / (historyData?.rates[values.fourthVal] ?? 1) * (historyData?.rates[values.firstVal] ?? 1)) /
+                            (1 / (currentDate?.rates[values.fourthVal] ?? 1) * (currentDate?.rates[values.firstVal] ?? 1))) - 100).toFixed(2) + "%")
+                    }
+                }
+            })
         })
-
     })
 }

@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {getSymbolsFromApi} from "@/app/sevices/apiService";
+import {getSymbolsFromApi, updateData} from "@/app/sevices/apiService";
 
 export const changeValue = async (i: any, code: string) => {
     try {
@@ -52,7 +52,7 @@ export const getValue = async () => {
 export const updateExchangeRates = async (rates: string) => {
     try {
         await AsyncStorage.setItem("exchangeRates", rates);
-        await AsyncStorage.setItem("time", Date.now().toString());
+        await AsyncStorage.setItem("time", new Date(Date.now()).toString());
         return true;
     } catch (e) {
         console.log("Cache Service: Error saving exchange rates:", e);
@@ -95,7 +95,7 @@ export const updateTime = async () => {
 }
 
 export const setApiKey = async (key: string) => {
-    return getSymbolsFromApi(key)
+    return await updateData(true, key)
         .then(async result => {
             if (result == true) {
                 try {
@@ -139,6 +139,52 @@ export const getSymbols = async () => {
         return symbols && JSON.parse(symbols)?.success ? JSON.parse(symbols) : null;
     } catch (e) {
         console.log("Cache Service: Error retrieving symbols:", e);
+        return null;
+    }
+}
+
+export const getHistoryDiapason = async () => {
+    try {
+        const history = await AsyncStorage.getItem("history");
+        return history ? {
+            history: Number.parseFloat(history),
+            time: await AsyncStorage.getItem("timeHistory")
+        } : 0;
+    } catch (e) {
+        console.log("Cache Service: Error retrieving history diapason:", e);
+        return 0; // Default history diapason if retrieval fails
+    }
+}
+
+export const setHistoryDiapason = async (value: number) => {
+    try {
+        await AsyncStorage.setItem("history", value.toString());
+        await AsyncStorage.setItem("timeHistory", new Date(Date.now()).toString())
+        console.log("Cache Service: History diapason updated successfully:", value);
+        return true;
+    } catch (e) {
+        console.log("Cache Service: Error updating history diapason:", e);
+        return false;
+    }
+}
+
+export const updateHistorycalExchangeRates = async (rates: string) => {
+    try {
+        await AsyncStorage.setItem("historyExchangeRates", rates);
+        console.log("Cache Service: History exchange rates updated successfully");
+        return ;
+    } catch (e) {
+        console.log("Cache Service: Error updating history exchange rates:", e);
+        return false;
+    }
+}
+
+export const getHistorycalExchangeRates = async () => {
+    try {
+        const rates = await AsyncStorage.getItem("historyExchangeRates");
+        return rates ? JSON.parse(rates) : null;
+    } catch (e) {
+        console.log("Cache Service: Error retrieving history exchange rates:", e);
         return null;
     }
 }

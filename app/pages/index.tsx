@@ -1,13 +1,14 @@
 import {Text, View, StyleSheet, TextInput, Alert} from "react-native";
-import {Link, Redirect, router, Stack, useLocalSearchParams} from "expo-router";
+import {Link, router} from "expo-router";
 import {Table, Row, Rows} from "react-native-table-component";
 import {getValue, getTime, getApiKey} from "@/app/sevices/cacheService";
 import {updateData} from "@/app/sevices/apiService";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {calculate, exchangeRateTable} from "@/app/sevices/calcService";
 import {calcData} from "@/app/entities/calcData";
 import {errorDescription} from "@/app/sevices/helper";
 import {Toast} from "toastify-react-native";
+import ToastManager from "toastify-react-native/components/ToastManager";
 
 export default function Index() {
     const [values, setValues] = useState({
@@ -18,9 +19,18 @@ export default function Index() {
     });
 
     const [table, setTable] = useState({
-        secondVal: "",
-        thirdVal: "",
-        fourthVal: "",
+        secondVal: {
+            currentVal: "",
+            percentVal: ""
+        },
+        thirdVal: {
+            currentVal: "",
+            percentVal: ""
+        },
+        fourthVal: {
+            currentVal: "",
+            percentVal: ""
+        },
     });
 
     const [data, setData] = useState({
@@ -32,20 +42,39 @@ export default function Index() {
 
     const [time, setTime] = useState("");
 
-    const res = updateData().then(async d => {
-        if (d !== true && typeof d === "string") {
-            if (!d.includes("101") && !d.includes(" 1000")) await Alert.alert("Update failed", errorDescription(d));
-            else if (d.includes(" 1000")) Toast.info("The data is out of date")
-            else if (d.includes("101")) router.replace("/pages/ApiKeySettings")
-        }
+    new Promise(async resolve => {
+        setTimeout(resolve, 5000)
+        await updateData(false).then(d => {
+            if (d !== true) {
+                if (!d.includes("101") && !d.includes(" 1000")) Alert.alert("Update failed", errorDescription(d));
+                else if (d.includes(" 1000")) Toast.info("The data is out of date")
+                else if (d.includes("101")) router.replace("/pages/ApiKeySettings")
+            }
+        });
     });
+
+
+    const date = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
 
     getValue().then(setValues)
 
     getTime().then(setTime);
 
     exchangeRateTable().then(data => {
-            setTable(data ?? {secondVal: "?", thirdVal: "?", fourthVal: "?"});
+            setTable(data??{
+                secondVal: {
+                    currentVal: "",
+                    percentVal: ""
+                },
+                thirdVal: {
+                    currentVal: "",
+                    percentVal: ""
+                },
+                fourthVal: {
+                    currentVal: "",
+                    percentVal: ""
+                },
+            });
         }
     )
 
@@ -59,7 +88,7 @@ export default function Index() {
         >
 
             <Text
-                style={styles.updated}>Updated: {time ? new Date(Date.now()).getHours() - new Date(time).getHours() : "?"} hours
+                style={styles.updated}>Updated: {time ? ((Date.now() - Date.parse(time)) / (1000 * 60 * 60)).toFixed(0) : "?"} hours
                 ago</Text>
             <View style={styles.textBoxAndValPicker}>
                 <View style={styles.valuePicker}>
@@ -92,6 +121,14 @@ export default function Index() {
                                 });
                             }
                         });
+                    }}
+                    onSubmitEditing={e => {
+                        setData({
+                            firstData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
+                            secondData: data.secondData,
+                            thirdData: data.thirdData,
+                            fourthData: data.fourthData,
+                        })
                     }}
 
                 />
@@ -130,6 +167,14 @@ export default function Index() {
                             }
                         });
                     }}
+                    onSubmitEditing={e => {
+                        setData({
+                            firstData: data.firstData,
+                            secondData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
+                            thirdData: data.thirdData,
+                            fourthData: data.fourthData,
+                        })
+                    }}
                 />
             </View>
 
@@ -165,6 +210,14 @@ export default function Index() {
                                 });
                             }
                         });
+                    }}
+                    onSubmitEditing={e => {
+                        setData({
+                            firstData: data.firstData,
+                            secondData: data.secondData,
+                            thirdData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
+                            fourthData: data.fourthData,
+                        })
                     }}
                 />
             </View>
@@ -202,6 +255,14 @@ export default function Index() {
                             }
                         });
                     }}
+                    onSubmitEditing={e => {
+                        setData({
+                            firstData: data.firstData,
+                            secondData: data.secondData,
+                            thirdData: data.thirdData,
+                            fourthData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
+                        })
+                    }}
                 />
             </View>
 
@@ -215,11 +276,11 @@ export default function Index() {
                              textStyle={{fontSize: 18, fontWeight: "semibold", color: "#4C4C4C"}}
                              style={{marginBottom: 2}}/>
                         <Rows
-                            data={[[values.secondVal, table.secondVal, table.secondVal != "?" ? ((Number.parseFloat(table.secondVal) * 101) / 100).toFixed(2) : "?", ""]]}
+                            data={[[values.secondVal, table.secondVal.currentVal, table.secondVal.percentVal]]}
                             textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
                             style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
                         <Rows
-                            data={[[values.thirdVal, table.thirdVal, table.thirdVal != "?" ? ((Number.parseFloat(table.thirdVal) * 101) / 100).toFixed(2) : "?", ""]]}
+                            data={[[values.thirdVal, table.thirdVal.currentVal, table.thirdVal.percentVal]]}
                             textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{
                             paddingTop: 10,
                             paddingBottom: 10,
@@ -227,12 +288,13 @@ export default function Index() {
                             borderBottomColor: "#DDDDDD"
                         }}/>
                         <Rows
-                            data={[[values.fourthVal, table.fourthVal, table.fourthVal != "?" ? ((Number.parseFloat(table.fourthVal) * 101) / 100).toFixed(2) : "?", ""]]}
+                            data={[[values.fourthVal, table.fourthVal.currentVal, table.fourthVal.percentVal]]}
                             textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
                             style={{paddingTop: 10, marginBottom: 36}}/>
                     </Table>
                 </View>
             </View>
+            <ToastManager/>
         </View>
 
     );

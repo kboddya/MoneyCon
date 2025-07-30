@@ -1,8 +1,6 @@
 import {FlatList, View, Text, StyleSheet} from 'react-native';
-import {Link, Stack, useLocalSearchParams} from "expo-router";
-import {getSymbols} from "../sevices/cacheService";
+import {Link, useLocalSearchParams} from "expo-router";
 import {changeValue} from "../sevices/cacheService";
-import {useEffect, useState} from "react";
 
 const currencies = require("../../assets/currencies.json");
 
@@ -19,7 +17,7 @@ export default function ValPicker() {
     }}>
 
         <FlatList data={currencies} renderItem={({item}) => (
-            <Link onPress={() => changeValue(ID, item.code)} dismissTo href={"/pages"}>
+            <Link onPress={() => changeValue(ID, item.code)} dismissTo href={"/"}>
                 <View style={styles.item}>
                     <View style={styles.fullNamePart}>
                         <Text style={styles.itemText}>{item.fullName}</Text>
