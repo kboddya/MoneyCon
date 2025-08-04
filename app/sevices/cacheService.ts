@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {getSymbolsFromApi, updateData} from "@/app/sevices/apiService";
+import {updateData} from "@/app/sevices/apiService";
 
 export const changeValue = async (i: any, code: string) => {
     try {
@@ -97,7 +97,7 @@ export const updateTime = async () => {
 export const setApiKey = async (key: string) => {
     return await updateData(true, key)
         .then(async result => {
-            if (result == true) {
+            if (result.success) {
                 try {
                     await AsyncStorage.setItem("apiKey", key);
                     console.log("Cache Service: API key saved successfully:", key);
@@ -172,7 +172,7 @@ export const updateHistorycalExchangeRates = async (rates: string) => {
     try {
         await AsyncStorage.setItem("historyExchangeRates", rates);
         console.log("Cache Service: History exchange rates updated successfully");
-        return ;
+        return true;
     } catch (e) {
         console.log("Cache Service: Error updating history exchange rates:", e);
         return false;

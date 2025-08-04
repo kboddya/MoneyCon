@@ -3,7 +3,6 @@ import {Text, View, StyleSheet, TextInput, Alert} from 'react-native';
 import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/app/sevices/cacheService";
 import React, {useState} from "react";
 import {errorDescription} from "@/app/sevices/helper";
-import ToastManager from "toastify-react-native/components/ToastManager";
 
 export default function ApiKeySettings() {
 
@@ -24,7 +23,7 @@ export default function ApiKeySettings() {
             }}>
             <Text style={{marginTop: 15, fontSize: 19, fontWeight: "semibold"}}>Exchange history interval</Text>
             <View style={styles.historyContainer}>
-                <View style={history === 1 ? styles.historyActiveLeft : styles.historyInactive} onTouchEnd={event => {
+                <View style={history === 1 ? styles.historyActiveLeft : styles.historyInactive} onTouchEnd={() => {
                     if (history === 1) return;
                     setHistory(1);
                     setHistoryDiapason(1).then(result => {
@@ -36,7 +35,7 @@ export default function ApiKeySettings() {
                 }}>
                     <Text style={{fontSize: 18}}>1 day</Text>
                 </View>
-                <View style={history === 7 ? styles.historyActiveCenter : styles.historyInactive} onTouchEnd={event => {
+                <View style={history === 7 ? styles.historyActiveCenter : styles.historyInactive} onTouchEnd={() => {
                     if (history === 7) return;
                     setHistory(7);
                     setHistoryDiapason(7).then(result => {
@@ -49,7 +48,7 @@ export default function ApiKeySettings() {
                     <Text style={{fontSize: 18}}>7 days</Text>
                 </View>
                 <View style={history === 30 ? styles.historyActiveRight : styles.historyInactiveLast}
-                      onTouchEnd={event => {
+                      onTouchEnd={() => {
                           if (history === 30) return;
                           setHistory(30);
                           setHistoryDiapason(30).then(result => {
@@ -72,26 +71,25 @@ export default function ApiKeySettings() {
                     onSubmitEditing={e => {
                         setApiKey(e.nativeEvent.text)
                             .then(result => {
-                                console.log(result);
-                                if (result === false) {
-                                    Alert.alert("Invalid API key. Please try again.");
-                                } else if (result === "Error: HTTP error status: 401") {
-                                    Alert.alert(result);
-                                } else if (typeof result === "string") {
-                                    Alert.alert("Error", errorDescription(result), [
+                                if ((typeof result === "object" && !result.success) || result === false) {
+                                    Alert.alert("Error", errorDescription(!result ? "" : result.error), [
                                         {
                                             text: "Try again",
                                             onPress: () => setValue("")
                                         }
                                     ]);
                                 } else {
-                                    setValue("");
-                                    Alert.alert("Success", "API key was saved success" , [{
-                                        text: "Close"
-                                    },{
-                                        text: "Go Home",
-                                        onPress: () => router.replace("/")
-                                    }])
+                                    Alert.alert("Success", "API key was saved success",
+                                        [
+                                            {
+                                                text: "Close",
+                                                onPress: () => setValue("")
+                                            },
+                                            {
+                                                text: "Go Home",
+                                                onPress: () => router.replace("/")
+                                            }
+                                        ])
                                 }
                             })
                     }
@@ -103,7 +101,6 @@ export default function ApiKeySettings() {
                 You can get your API key from <Link href={"https://exchangeratesapi.io/"}
                                                     style={{color: "blue"}}>exchangerates</Link>
             </Text>
-            <ToastManager/>
         </View>
     );
 }

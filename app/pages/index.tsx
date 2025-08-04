@@ -1,16 +1,33 @@
-import {Text, View, StyleSheet, TextInput, Alert} from "react-native";
+import {StyleSheet, Text, TextInput, View} from "react-native";
 import {Link, router} from "expo-router";
-import {Table, Row, Rows} from "react-native-table-component";
-import {getValue, getTime, getApiKey} from "@/app/sevices/cacheService";
+import {Row, Rows, Table} from "react-native-table-component";
+import {getTime, getValue} from "@/app/sevices/cacheService";
 import {updateData} from "@/app/sevices/apiService";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {calculate, exchangeRateTable} from "@/app/sevices/calcService";
 import {calcData} from "@/app/entities/calcData";
-import {errorDescription} from "@/app/sevices/helper";
-import {Toast} from "toastify-react-native";
-import ToastManager from "toastify-react-native/components/ToastManager";
+import Toast from "react-native-simple-toast"
 
 export default function Index() {
+    const [errorStatus, setErrorStatus] = useState("");
+
+    useEffect(() => {
+        updateData().then(d => {
+            if (!d.success) {
+                setErrorStatus(d.error);
+            } else if (d.success && errorStatus !== "") {
+                setErrorStatus("");
+            }
+        });
+    });
+
+    useEffect(() => {
+        if (errorStatus === "Update already in progress") Toast.show("Update already in progress", Toast.LONG);
+        else if (errorStatus.includes("1000")) Toast.show("Error updating data. Please try again later.", Toast.LONG);
+        else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
+        else if (errorStatus === "") Toast.show("Data updated successfully", Toast.SHORT);
+    }, [errorStatus]);
+
     const [values, setValues] = useState({
         firstVal: "",
         secondVal: "",
@@ -42,26 +59,12 @@ export default function Index() {
 
     const [time, setTime] = useState("");
 
-    new Promise(async resolve => {
-        setTimeout(resolve, 5000)
-        await updateData(false).then(d => {
-            if (d !== true) {
-                if (!d.includes("101") && !d.includes(" 1000")) Alert.alert("Update failed", errorDescription(d));
-                else if (d.includes(" 1000")) Toast.info("The data is out of date")
-                else if (d.includes("101")) router.replace("/pages/ApiKeySettings")
-            }
-        });
-    });
-
-
-    const date = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
-
     getValue().then(setValues)
 
     getTime().then(setTime);
 
     exchangeRateTable().then(data => {
-            setTable(data??{
+            setTable(data ?? {
                 secondVal: {
                     currentVal: "",
                     percentVal: ""
@@ -91,18 +94,24 @@ export default function Index() {
                 style={styles.updated}>Updated: {time ? ((Date.now() - Date.parse(time)) / (1000 * 60 * 60)).toFixed(0) : "?"} hours
                 ago</Text>
             <View style={styles.textBoxAndValPicker}>
-                <View style={styles.valuePicker}>
-                    <Link href={"/pages/ValPicker?ID=1"} style={styles.valueButton}>
-                        <View style={styles.valueButton}><Text
-                            style={styles.valueButtonText}>{values.firstVal ?? "?"}</Text>
+
+                <Link href={"/pages/ValPicker?ID=1"}>
+                    <View style={styles.valuePicker}>
+                        <View style={styles.valueButton}>
+
+                            <View style={styles.valueButton}><Text
+                                style={styles.valueButtonText}>{values.firstVal ?? "?"}</Text>
+                            </View>
+
                         </View>
-                    </Link>
-                </View>
+                    </View>
+                </Link>
+
                 <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
-                    value={data.firstData != "NaN" ? data.firstData : ""}
+                    value={data.firstData !== "NaN" ? data.firstData : ""}
                     onChangeText={text => {
                         setData({
                             firstData: text,
@@ -111,7 +120,7 @@ export default function Index() {
                             fourthData: data.fourthData,
                         });
                         calculate(new calcData(values, text, 1)).then(d => {
-                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
                                 setData({
                                     firstData: d.firstData,
@@ -136,18 +145,24 @@ export default function Index() {
 
 
             <View style={styles.textBoxAndValPicker}>
-                <View style={styles.valuePicker}>
-                    <Link href={"/pages/ValPicker?ID=2"} style={styles.valueButton}>
-                        <View style={styles.valueButton}><Text
-                            style={styles.valueButtonText}>{values.secondVal ?? "?"}</Text>
+
+                <Link href={"/pages/ValPicker?ID=2"}>
+                    <View style={styles.valuePicker}>
+                        <View style={styles.valueButton}>
+
+                            <View style={styles.valueButton}><Text
+                                style={styles.valueButtonText}>{values.secondVal ?? "?"}</Text>
+                            </View>
+
                         </View>
-                    </Link>
-                </View>
+                    </View>
+                </Link>
+
                 <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
-                    value={data.secondData != "NaN" ? data.secondData : ""}
+                    value={data.secondData !== "NaN" ? data.secondData : ""}
                     onChangeText={text => {
                         setData({
                             firstData: data.firstData,
@@ -156,7 +171,7 @@ export default function Index() {
                             fourthData: data.fourthData,
                         });
                         calculate(new calcData(values, text, 2)).then(d => {
-                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
                                 setData({
                                     firstData: d.firstData,
@@ -179,19 +194,23 @@ export default function Index() {
             </View>
 
             <View style={styles.textBoxAndValPicker}>
-                <View style={styles.valuePicker}>
-                    <Link href={"/pages/ValPicker?ID=3"} style={styles.valueButton}>
+
+                <Link href={"/pages/ValPicker?ID=3"}>
+                    <View style={styles.valuePicker}>
                         <View style={styles.valueButton}>
-                            <Text
+                            <View style={styles.valueButton}><Text
                                 style={styles.valueButtonText}>{values.thirdVal ?? "?"}</Text>
+                            </View>
+
                         </View>
-                    </Link>
-                </View>
+                    </View>
+                </Link>
+
                 <TextInput
                     style={styles.textInput}
                     keyboardType={"numeric"}
                     placeholder={"Enter amount"}
-                    value={data.thirdData != "NaN" ? data.thirdData : ""}
+                    value={data.thirdData !== "NaN" ? data.thirdData : ""}
                     onChangeText={text => {
                         setData({
                             firstData: data.firstData,
@@ -200,7 +219,7 @@ export default function Index() {
                             fourthData: data.fourthData,
                         });
                         calculate(new calcData(values, text, 3)).then(d => {
-                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
                                 setData({
                                     firstData: d.firstData,
@@ -223,19 +242,23 @@ export default function Index() {
             </View>
 
             <View style={styles.textBoxAndValPicker}>
-                <View style={styles.valuePicker}>
-                    <Link href={"/pages/ValPicker?ID=4"} style={styles.valueButton}>
+
+                <Link href={"/pages/ValPicker?ID=4"}>
+                    <View style={styles.valuePicker}>
                         <View style={styles.valueButton}>
-                            <Text
+                            <View style={styles.valueButton}><Text
                                 style={styles.valueButtonText}>{values.fourthVal ?? "?"}</Text>
+                            </View>
+
                         </View>
-                    </Link>
-                </View>
+                    </View>
+                </Link>
+
                 <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
-                    value={data.fourthData != "NaN" ? data.fourthData : ""}
+                    value={data.fourthData !== "NaN" ? data.fourthData : ""}
                     onChangeText={text => {
                         setData({
                             firstData: data.firstData,
@@ -244,7 +267,7 @@ export default function Index() {
                             fourthData: text,
                         });
                         calculate(new calcData(values, text, 4)).then(d => {
-                            if (d == null) Toast.error("Exchange rates are not available. Please try again later.");
+                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
                                 setData({
                                     firstData: d.firstData,
@@ -272,15 +295,15 @@ export default function Index() {
                 </View>
                 <View style={styles.placeExchangeRateTableTablet}>
                     <Table borderStyle={{borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}>
-                        <Row data={["", "Buying", "Selling", values.firstVal]}
+                        <Row data={["", "Rate", "Percent", values.firstVal]}
                              textStyle={{fontSize: 18, fontWeight: "semibold", color: "#4C4C4C"}}
                              style={{marginBottom: 2}}/>
                         <Rows
-                            data={[[values.secondVal, table.secondVal.currentVal, table.secondVal.percentVal]]}
+                            data={[[values.secondVal, table.secondVal.currentVal, (table.secondVal.percentVal.includes("-") ? "" : "+") + table.secondVal.percentVal, ""]]}
                             textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
                             style={{paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#DDDDDD"}}/>
                         <Rows
-                            data={[[values.thirdVal, table.thirdVal.currentVal, table.thirdVal.percentVal]]}
+                            data={[[values.thirdVal, table.thirdVal.currentVal, (table.thirdVal.percentVal.includes("-") ? "" : "+") + table.thirdVal.percentVal, ""]]}
                             textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}} style={{
                             paddingTop: 10,
                             paddingBottom: 10,
@@ -288,13 +311,12 @@ export default function Index() {
                             borderBottomColor: "#DDDDDD"
                         }}/>
                         <Rows
-                            data={[[values.fourthVal, table.fourthVal.currentVal, table.fourthVal.percentVal]]}
+                            data={[[values.fourthVal, table.fourthVal.currentVal, (table.fourthVal.percentVal.includes("-") ? "" : "+") + table.fourthVal.percentVal, ""]]}
                             textStyle={{fontSize: 18, fontWeight: "regular", color: "#4C4C4C"}}
                             style={{paddingTop: 10, marginBottom: 36}}/>
                     </Table>
                 </View>
             </View>
-            <ToastManager/>
         </View>
 
     );
