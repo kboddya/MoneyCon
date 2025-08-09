@@ -1,6 +1,6 @@
-import {getExchangeRates, getHistorycalExchangeRates, getValue} from "@/app/sevices/cacheService";
+import {getExchangeRates, getHistorycalExchangeRates, getValue} from "@/app/services/cacheService";
 import {calcData} from "@/app/entities/calcData";
-import {updateData} from "@/app/sevices/apiService";
+import {updateData} from "@/app/services/apiService";
 
 export const calculate = async (data: calcData) => {
     const rates = await getExchangeRates();
@@ -19,28 +19,28 @@ export const calculate = async (data: calcData) => {
 
     switch (data.enterVal) {
         case 1: {
-            const convertedToBase = (Number.parseFloat(data.firstData) / excnageRates.firstVal)
+            const convertedToBase = (Number.parseFloat(data.firstData.replace(" ", "")) / excnageRates.firstVal)
             data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(4);
             data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(4);
             data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(4);
             break;
         }
         case 2: {
-            const convertedToBase = (Number.parseFloat(data.secondData) / excnageRates.secondVal)
+            const convertedToBase = (Number.parseFloat(data.secondData.replace(" ", "")) / excnageRates.secondVal)
             data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(4);
             data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(4);
             data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(4);
             break;
         }
         case 3: {
-            const convertedToBase = (Number.parseFloat(data.thirdData) / excnageRates.thirdVal)
+            const convertedToBase = (Number.parseFloat(data.thirdData.replace(" ", "")) / excnageRates.thirdVal)
             data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(4);
             data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(4);
             data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(4);
             break;
         }
         case 4: {
-            const convertedToBase = (Number.parseFloat(data.fourthData) / excnageRates.fourthVal)
+            const convertedToBase = (Number.parseFloat(data.fourthData.replace(" ", "")) / excnageRates.fourthVal)
             data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(4);
             data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(4);
             data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(4);

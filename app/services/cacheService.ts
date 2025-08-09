@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {updateData} from "@/app/sevices/apiService";
+import {updateData} from "@/app/services/apiService";
 
-export const changeValue = async (i: any, code: string) => {
+export const changeValue = async (i: string, code: string) => {
     try {
         switch (i) {
             case "1": {

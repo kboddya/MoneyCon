@@ -1,5 +1,5 @@
 export const errorDescription = (error: string) => {
-    if (error.includes("401")){
+    if (error.includes("401")) {
         return "Invalid API key. Please try again.";
     } else if (error.includes("404")) {
         return "The requested resource does not exist.";
@@ -35,10 +35,25 @@ export const errorDescription = (error: string) => {
         return "An invalid timeframe has been specified.";
     } else if (error.includes("505")) {
         return "The specified timeframe is too long, exceeding 365 days.";
-    } else if (error.includes("429")){
+    } else if (error.includes("429")) {
         return "The maximum allowed API amount of requests per minute has been reached.";
-    }else {
+    } else {
         console.log("Unknown error:", error);
         return "An unknown error occurred. Please try again.";
     }
+}
+
+
+export const formatNumber = async (number: {
+    firstData: string,
+    secondData: string,
+    thirdData: string,
+    fourthData: string
+}) => {
+    return {
+        firstData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number.firstData)).toString().replace(",", ".")),
+        secondData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number?.secondData)).toString().replace(",", ".")),
+        thirdData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number?.thirdData)).toString().replace(",", ".")),
+        fourthData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number?.fourthData)).toString().replace(",", "."))
+    };
 }

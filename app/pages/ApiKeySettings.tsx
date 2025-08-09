@@ -1,8 +1,8 @@
 import {Link, router} from 'expo-router';
-import {Text, View, StyleSheet, TextInput, Alert} from 'react-native';
-import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/app/sevices/cacheService";
+import {Text, View, StyleSheet, TextInput, Alert, useColorScheme} from 'react-native';
+import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/app/services/cacheService";
 import React, {useState} from "react";
-import {errorDescription} from "@/app/sevices/helper";
+import {errorDescription} from "@/app/services/helper";
 
 export default function ApiKeySettings() {
 
@@ -14,14 +14,40 @@ export default function ApiKeySettings() {
 
     const [value, setValue] = useState("");
 
+    const colorScheme = useColorScheme();
+
+    const styles = colorScheme === 'light' ? stylesLight : stylesDark;
     return (
         <View
             style={{
                 flex: 1,
                 alignItems: "center",
-                backgroundColor: "white",
+                backgroundColor: colorScheme === 'light' ? "white" : 'black',
             }}>
-            <Text style={{marginTop: 15, fontSize: 19, fontWeight: "semibold"}}>Exchange history interval</Text>
+
+            <View style={colorScheme === "light" ? {
+                width: "100%",
+                height: 0.2,
+                backgroundColor: "#4C4C4C",
+                opacity: 0.5
+            } : {
+                width: "100%",
+                backgroundColor: "#ABABAB",
+                height: 0.2,
+                opacity: 0.5
+            }}/>
+            <Text style={colorScheme === "light" ? {
+                marginTop: 15,
+                fontSize: 19,
+                fontWeight: "semibold",
+                color: "#4C4C4C"
+            } : {
+                marginTop: 15,
+                fontSize: 19,
+                fontWeight: "semibold",
+                color: "#ABABAB"
+            }}>Exchange history
+                interval</Text>
             <View style={styles.historyContainer}>
                 <View style={history === 1 ? styles.historyActiveLeft : styles.historyInactive} onTouchEnd={() => {
                     if (history === 1) return;
@@ -33,7 +59,7 @@ export default function ApiKeySettings() {
                         }
                     });
                 }}>
-                    <Text style={{fontSize: 18}}>1 day</Text>
+                    <Text style={styles.historyValue}>1 day</Text>
                 </View>
                 <View style={history === 7 ? styles.historyActiveCenter : styles.historyInactive} onTouchEnd={() => {
                     if (history === 7) return;
@@ -45,7 +71,7 @@ export default function ApiKeySettings() {
                         }
                     });
                 }}>
-                    <Text style={{fontSize: 18}}>7 days</Text>
+                    <Text style={styles.historyValue}>7 days</Text>
                 </View>
                 <View style={history === 30 ? styles.historyActiveRight : styles.historyInactiveLast}
                       onTouchEnd={() => {
@@ -58,16 +84,23 @@ export default function ApiKeySettings() {
                               }
                           });
                       }}>
-                    <Text style={{fontSize: 18}}>30 days</Text>
+                    <Text style={styles.historyValue}>30 days</Text>
                 </View>
             </View>
             <View style={styles.inputContainer}>
                 <TextInput
                     value={value}
                     onChangeText={setValue}
-                    style={{paddingLeft: 10, fontSize: 18, justifyContent: "center"}}
+                    style={colorScheme === "light" ? {
+                        paddingLeft: 10,
+                        fontSize: 18,
+                        justifyContent: "center",
+                        color: "#4C4C4C"
+                    } : {paddingLeft: 10, fontSize: 18, justifyContent: "center", color: "#ABABAB"}}
                     placeholder={apiKey === "" ? "Enter your API key" : apiKey}
                     keyboardType="default"
+                    autoCorrect={false}
+                    scrollEnabled={false}
                     onSubmitEditing={e => {
                         setApiKey(e.nativeEvent.text)
                             .then(result => {
@@ -97,27 +130,30 @@ export default function ApiKeySettings() {
                 />
             </View>
 
-            <Text style={{marginTop: 10, color: "#4C4C4C"}}>
+            <Text style={colorScheme === "light" ? {marginTop: "2%", color: "#4C4C4C"} : {
+                marginTop: "2%",
+                color: "#ABABAB"
+            }}>
                 You can get your API key from <Link href={"https://exchangeratesapi.io/"}
-                                                    style={{color: "blue"}}>exchangerates</Link>
+                                                    style={colorScheme === "light" ? {color: "blue"} : {color: "#6599ff"}}>exchangerates</Link>
             </Text>
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const stylesLight = StyleSheet.create({
     inputContainer: {
         marginTop: 17,
-        height: 50,
-        width: 330,
+        height: "5.9%",
+        width: "80%",
         backgroundColor: "#EFEFEF",
         borderRadius: 10,
         justifyContent: "center"
     },
 
     historyContainer: {
-        width: 330,
-        height: 48,
+        width: "80%",
+        height: "5.8%",
         backgroundColor: "#ffffff",
         borderWidth: 2,
         borderColor: "#EFEFEF",
@@ -130,8 +166,8 @@ const styles = StyleSheet.create({
     },
 
     historyActiveCenter: {
-        width: 330 / 3,
-        height: 48,
+        width: "33.333333333%",
+        height: "100%",
         borderWidth: 3,
         backgroundColor: "#EFEFEF",
         borderColor: "#EFEFEF",
@@ -140,8 +176,8 @@ const styles = StyleSheet.create({
     },
 
     historyActiveLeft: {
-        width: 330 / 3,
-        height: 48,
+        width: "33.333333333%",
+        height: "100%",
         borderWidth: 3,
         borderBottomLeftRadius: 10,
         borderTopLeftRadius: 10,
@@ -152,8 +188,8 @@ const styles = StyleSheet.create({
     },
 
     historyActiveRight: {
-        width: 330 / 3,
-        height: 48,
+        width: "33.333333333%",
+        height: "100%",
         borderWidth: 3,
         borderBottomRightRadius: 10,
         borderTopRightRadius: 10,
@@ -164,8 +200,8 @@ const styles = StyleSheet.create({
     },
 
     historyInactive: {
-        width: 330 / 3,
-        height: 48,
+        width: "33.333333333%",
+        height: "100%",
         borderRightWidth: 2,
         paddingLeft: 2,
         borderColor: "#EFEFEF",
@@ -174,11 +210,105 @@ const styles = StyleSheet.create({
     },
 
     historyInactiveLast: {
-        width: 330 / 3,
-        height: 48,
+        width: "33.333333333%",
+        height: "100%",
         borderColor: "#EFEFEF",
         alignItems: "center",
         justifyContent: "center",
     },
 
+    historyValue: {
+        fontSize: 18,
+        color: "#4C4C4C",
+    },
+
+    text: {
+        color: "#4C4C4C",
+    }
+});
+
+const stylesDark = StyleSheet.create({
+    inputContainer: {
+        marginTop: 17,
+        height: "5.9%",
+        width: "80%",
+        backgroundColor: "#272525",
+        borderRadius: 10,
+        justifyContent: "center"
+    },
+
+    historyContainer: {
+        width: "80%",
+        height: "5.8%",
+        backgroundColor: "#000000",
+        borderWidth: 2,
+        borderColor: "#272525",
+        borderRadius: 10,
+        padding: 0,
+        marginTop: 5,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    historyActiveCenter: {
+        width: "33.333333333%",
+        height: "101%",
+        borderWidth: 3,
+        backgroundColor: "#272525",
+        borderColor: "#272525",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    historyActiveLeft: {
+        width: "33.333333333%",
+        height: "101%",
+        borderWidth: 3,
+        borderBottomLeftRadius: 8,
+        borderTopLeftRadius: 8,
+        backgroundColor: "#272525",
+        borderColor: "#272525",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    historyActiveRight: {
+        width: "33.333333333%",
+        height: "101%",
+        borderWidth: 3,
+        borderBottomRightRadius: 8,
+        borderTopRightRadius: 8,
+        backgroundColor: "#272525",
+        borderColor: "#272525",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    historyInactive: {
+        width: "33.333333333%",
+        height: "100%",
+        borderRightWidth: 2,
+        paddingLeft: 2,
+        borderColor: "#272525",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    historyInactiveLast: {
+        width: "33.333333333%",
+        height: "100%",
+        borderColor: "#272525",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    historyValue: {
+        fontSize: 18,
+        color: "#ABABAB",
+    },
+
+    text: {
+        color: "#ABABAB",
+    }
 });

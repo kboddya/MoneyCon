@@ -1,6 +1,7 @@
-import {FlatList, View, Text, StyleSheet} from 'react-native';
+import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
 import {Link, useLocalSearchParams} from "expo-router";
-import {changeValue} from "../sevices/cacheService";
+import {changeValue} from "@/app/services/cacheService";
+import React from "react";
 
 const currencies = require("../../assets/currencies.json");
 
@@ -8,13 +9,21 @@ export default function ValPicker() {
 
     const {ID} = useLocalSearchParams();
 
+    const colorScheme = useColorScheme();
 
+    const styles = colorScheme === "light" ? stylesLight : stylesDark
     return (<View style={{
         flex: 1,
         alignItems: "center",
-        backgroundColor: "white",
+        backgroundColor: colorScheme === "light" ? "white" : "black",
         justifyContent: "center"
     }}>
+        <View style={colorScheme === "light" ? {width: "100%", height: 0.2, backgroundColor: "#4C4C4C", opacity: 0.5} : {
+            width: "100%",
+            backgroundColor: "#ABABAB",
+            height: 0.2,
+            opacity: 0.5
+        }}/>
 
         <FlatList data={currencies} renderItem={({item}) => (
             <Link onPress={() => changeValue(ID, item.code)} dismissTo href={"/"}>
@@ -28,18 +37,14 @@ export default function ValPicker() {
                 </View>
             </Link>
 
-        )} style={
-            {
-                marginBottom: 12
-            }
-        }
+        )} style={{marginBottom: 12}}
         />
 
     </View>)
         ;
 }
 
-const styles = StyleSheet.create({
+const stylesLight = StyleSheet.create({
     item: {
         padding: 20,
         borderBottomWidth: 1,
@@ -57,5 +62,28 @@ const styles = StyleSheet.create({
     },
     itemText: {
         fontSize: 18,
+        color: "#4C4C4C"
+    },
+});
+
+const stylesDark = StyleSheet.create({
+    item: {
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ABABAB',
+        flexDirection: 'row',
+    },
+    fullNamePart: {
+        marginLeft: 10,
+        width: 330 - 56,
+    },
+    codePart: {
+        width: 56,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    itemText: {
+        fontSize: 18,
+        color: "#ABABAB"
     },
 });

@@ -1,6 +1,11 @@
 export class calcData {
 
-    constructor(values: any, data: string, val: number) {
+    constructor(values: {
+        firstVal?: string;
+        secondVal?: string;
+        thirdVal?: string;
+        fourthVal?: string;
+    }, data: string, val: number) {
         this.val.firstVal = values.firstVal ?? "";
         this.val.secondVal = values.secondVal ?? "";
         this.val.thirdVal = values.thirdVal ?? "";

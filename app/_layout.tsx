@@ -1,21 +1,28 @@
 import {Link, router, Stack} from "expo-router";
-import {Alert} from "react-native";
-import {updateData} from "@/app/sevices/apiService";
+import {Alert, useColorScheme} from "react-native";
+import {updateData} from "@/app/services/apiService";
 import {Image} from "expo-image";
 import Toast from "react-native-simple-toast"
-import {errorDescription} from "@/app/sevices/helper";
-import {dismissTo} from "expo-router/build/global-state/routing";
-import {getApiKey} from "@/app/sevices/cacheService";
+import {errorDescription} from "@/app/services/helper";
 
 export const unstable_settings = {
     initialRouteName: "/pages", // Set the initial route to the index page
     // Ensure that the app is always in dark mode
-    appearance: "light",
 }
 
 export default function RootLayout() {
+    const theme = useColorScheme();
     return (
-        <Stack>
+        <Stack screenOptions={{
+            headerStyle: {
+                backgroundColor: theme === 'light' ? "white" : "black", // Dark gray background
+            },
+            headerTintColor: theme === 'light' ? "#4C4C4C": "#ABABAB", // White text color for the header
+            headerTitleStyle: {
+                fontWeight: "bold",
+            },
+            headerShadowVisible: false,
+        }}>
             <Stack.Screen name={"index"} options={{
                 title: "MoneyCon",
                 headerRight: () => <Link href={"/pages/ApiKeySettings"}><Image
@@ -24,16 +31,16 @@ export default function RootLayout() {
                         height: 25,
                         padding: 14
                     }}
-                    source={require("../assets/images/Settings.svg")}
+                    source={theme === 'light'? require("../assets/images/Settings-light.svg"): require("../assets/images/Settings-dark.svg")}
                 /></Link>,
-                headerTitleAlign: "center"
+                headerTitleAlign: "center",
             }}/>
             <Stack.Screen name={"pages/ApiKeySettings"} options={{
                 title: "Settings",
                 headerTitleAlign: "center",
                 headerRight: () =>
-                    <Image style={{width: 20, height: 20, padding: 11}}
-                           source={require("../assets/images/reload.png")}
+                    <Image style={{width: 25, height: 25, padding: 11}}
+                           source={theme === 'light'? require("../assets/images/reload-light.png"): require("../assets/images/reload-dark.png")}
                            onTouchEnd={event => {
                                Toast.show("Updating data...", Toast.SHORT);
                                updateData(true).then(data => {

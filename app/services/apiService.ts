@@ -4,7 +4,7 @@ import {
     getTime,
     updateExchangeRates, updateHistorycalExchangeRates,
     updateSymbols
-} from "@/app/sevices/cacheService";
+} from "@/app/services/cacheService";
 
 export const getSymbolsFromApi = async (apiKey: string) => {
     try {
