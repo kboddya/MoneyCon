@@ -57,6 +57,15 @@ export default function Index() {
         fourthData: "",
     })
 
+    useEffect(() => {
+        setData({
+            firstData: "",
+            secondData: "",
+            thirdData: "",
+            fourthData: "",
+        })
+    }, [values.firstVal, values.secondVal, values.thirdVal, values.fourthVal]);
+
     const [time, setTime] = useState("");
 
     getValue().then(setValues)
@@ -146,6 +155,14 @@ export default function Index() {
                                 });
                             }
                         });
+                    }}
+                    onSubmitEditing={e => {
+                        setData({
+                            firstData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
+                            secondData: data.secondData,
+                            thirdData: data.thirdData,
+                            fourthData: data.fourthData,
+                        })
                     }}
 
                 />

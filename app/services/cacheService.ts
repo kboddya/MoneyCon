@@ -20,6 +20,9 @@ export const changeValue = async (i: string, code: string) => {
                 await AsyncStorage.setItem("fourthVal", code);
                 break;
             }
+            default: {
+                return null;
+            }
         }
     } catch (e) {
         console.log("Error saving value:", e);

@@ -3,6 +3,7 @@ import {Text, View, StyleSheet, TextInput, Alert, useColorScheme} from 'react-na
 import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/app/services/cacheService";
 import React, {useState} from "react";
 import {errorDescription} from "@/app/services/helper";
+import SegmentedControl from "@react-native-segmented-control/segmented-control";
 
 export default function ApiKeySettings() {
 
@@ -48,45 +49,57 @@ export default function ApiKeySettings() {
                 color: "#ABABAB"
             }}>Exchange history
                 interval</Text>
-            <View style={styles.historyContainer}>
-                <View style={history === 1 ? styles.historyActiveLeft : styles.historyInactive} onTouchEnd={() => {
-                    if (history === 1) return;
-                    setHistory(1);
-                    setHistoryDiapason(1).then(result => {
-                        if (!result) {
-                            setHistory(0)
-                            Alert.alert("Error saving history diapason. Please try again.");
+
+            <SegmentedControl
+                values={["1 day", "7 days", "30 days"]}
+                selectedIndex={history === 1 ? 0 : history === 7 ? 1 : history === 30 ? 2 : -1}
+                style={{...styles.historyContainer}}
+                fontStyle={styles.historyValue}
+                tintColor={colorScheme === "light" ? "#EFEFEF" : "#272525"}
+                activeFontStyle={styles.historyValue}
+                sliderStyle={{borderRadius: 10}}
+                onChange={event => {
+                    switch (event.nativeEvent.value) {
+                        case "1 day": {
+                            if (history === 1) return;
+                            setHistory(1);
+                            setHistoryDiapason(1).then(result => {
+                                if (!result) {
+                                    setHistory(0);
+                                    Alert.alert("Error saving history diapason. Please try again.");
+                                }
+                            });
+                            break;
                         }
-                    });
-                }}>
-                    <Text style={styles.historyValue}>1 day</Text>
-                </View>
-                <View style={history === 7 ? styles.historyActiveCenter : styles.historyInactive} onTouchEnd={() => {
-                    if (history === 7) return;
-                    setHistory(7);
-                    setHistoryDiapason(7).then(result => {
-                        if (!result) {
-                            setHistory(0)
-                            Alert.alert("Error saving history diapason. Please try again.");
+                        case "7 days": {
+                            if (history === 7) return;
+                            setHistory(7);
+                            setHistoryDiapason(7).then(result => {
+                                if (!result) {
+                                    setHistory(0);
+                                    Alert.alert("Error saving history diapason. Please try again.");
+                                }
+                            });
+                            break;
                         }
-                    });
-                }}>
-                    <Text style={styles.historyValue}>7 days</Text>
-                </View>
-                <View style={history === 30 ? styles.historyActiveRight : styles.historyInactiveLast}
-                      onTouchEnd={() => {
-                          if (history === 30) return;
-                          setHistory(30);
-                          setHistoryDiapason(30).then(result => {
-                              if (!result) {
-                                  setHistory(0)
-                                  Alert.alert("Error saving history diapason. Please try again.");
-                              }
-                          });
-                      }}>
-                    <Text style={styles.historyValue}>30 days</Text>
-                </View>
-            </View>
+                        case "30 days": {
+                            if (history === 30) return;
+                            setHistory(30);
+                            setHistoryDiapason(30).then(result => {
+                                if (!result) {
+                                    setHistory(0);
+                                    Alert.alert("Error saving history diapason. Please try again.");
+                                }
+                            });
+                            break;
+                        }
+                        default: {
+                            Alert.alert("Error", "Unknown history interval selected");
+                        }
+                    }
+                }}
+            />
+
             <View style={styles.inputContainer}>
                 <TextInput
                     value={value}
@@ -155,64 +168,12 @@ const stylesLight = StyleSheet.create({
         width: "80%",
         height: "5.8%",
         backgroundColor: "#ffffff",
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: "#EFEFEF",
         borderRadius: 10,
         padding: 0,
         marginTop: 5,
         flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyActiveCenter: {
-        width: "33.333333333%",
-        height: "100%",
-        borderWidth: 3,
-        backgroundColor: "#EFEFEF",
-        borderColor: "#EFEFEF",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyActiveLeft: {
-        width: "33.333333333%",
-        height: "100%",
-        borderWidth: 3,
-        borderBottomLeftRadius: 10,
-        borderTopLeftRadius: 10,
-        backgroundColor: "#EFEFEF",
-        borderColor: "#EFEFEF",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyActiveRight: {
-        width: "33.333333333%",
-        height: "100%",
-        borderWidth: 3,
-        borderBottomRightRadius: 10,
-        borderTopRightRadius: 10,
-        backgroundColor: "#EFEFEF",
-        borderColor: "#EFEFEF",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyInactive: {
-        width: "33.333333333%",
-        height: "100%",
-        borderRightWidth: 2,
-        paddingLeft: 2,
-        borderColor: "#EFEFEF",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyInactiveLast: {
-        width: "33.333333333%",
-        height: "100%",
-        borderColor: "#EFEFEF",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -241,64 +202,12 @@ const stylesDark = StyleSheet.create({
         width: "80%",
         height: "5.8%",
         backgroundColor: "#000000",
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: "#272525",
         borderRadius: 10,
         padding: 0,
         marginTop: 5,
         flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyActiveCenter: {
-        width: "33.333333333%",
-        height: "101%",
-        borderWidth: 3,
-        backgroundColor: "#272525",
-        borderColor: "#272525",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyActiveLeft: {
-        width: "33.333333333%",
-        height: "101%",
-        borderWidth: 3,
-        borderBottomLeftRadius: 8,
-        borderTopLeftRadius: 8,
-        backgroundColor: "#272525",
-        borderColor: "#272525",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyActiveRight: {
-        width: "33.333333333%",
-        height: "101%",
-        borderWidth: 3,
-        borderBottomRightRadius: 8,
-        borderTopRightRadius: 8,
-        backgroundColor: "#272525",
-        borderColor: "#272525",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyInactive: {
-        width: "33.333333333%",
-        height: "100%",
-        borderRightWidth: 2,
-        paddingLeft: 2,
-        borderColor: "#272525",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyInactiveLast: {
-        width: "33.333333333%",
-        height: "100%",
-        borderColor: "#272525",
         alignItems: "center",
         justifyContent: "center",
     },

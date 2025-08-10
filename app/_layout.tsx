@@ -7,7 +7,6 @@ import {errorDescription} from "@/app/services/helper";
 
 export const unstable_settings = {
     initialRouteName: "/pages", // Set the initial route to the index page
-    // Ensure that the app is always in dark mode
 }
 
 export default function RootLayout() {
@@ -25,13 +24,13 @@ export default function RootLayout() {
         }}>
             <Stack.Screen name={"index"} options={{
                 title: "MoneyCon",
-                headerRight: () => <Link href={"/pages/ApiKeySettings"}><Image
+                headerRight: () => <Link href={"/pages/ApiKeySettings"} style={{backgroundSize: 40}}><Image
                     style={{
                         width: 25,
                         height: 25,
                         padding: 14
                     }}
-                    source={theme === 'light'? require("../assets/images/Settings-light.svg"): require("../assets/images/Settings-dark.svg")}
+                    source={theme === 'light'? require("../assets/images/Settings-light.png"): require("../assets/images/Settings-dark.png")}
                 /></Link>,
                 headerTitleAlign: "center",
             }}/>

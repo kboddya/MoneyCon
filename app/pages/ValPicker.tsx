@@ -2,6 +2,7 @@ import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
 import {Link, useLocalSearchParams} from "expo-router";
 import {changeValue} from "@/app/services/cacheService";
 import React from "react";
+import Toast from "react-native-simple-toast";
 
 const currencies = require("../../assets/currencies.json");
 
@@ -26,7 +27,11 @@ export default function ValPicker() {
         }}/>
 
         <FlatList data={currencies} renderItem={({item}) => (
-            <Link onPress={() => changeValue(ID, item.code)} dismissTo href={"/"}>
+            <Link onPress={() => changeValue(ID.toString(), item.code).then(res => {
+                if (res === null) {
+                    Toast.show("Error saving value", Toast.SHORT);
+                }
+            })} dismissTo href={"/"}>
                 <View style={styles.item}>
                     <View style={styles.fullNamePart}>
                         <Text style={styles.itemText}>{item.fullName}</Text>
