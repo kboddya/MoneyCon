@@ -1,7 +1,7 @@
 import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
 import {Link, useLocalSearchParams} from "expo-router";
 import {changeValue} from "@/app/services/cacheService";
-import React from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import Toast from "react-native-simple-toast";
 
 const currencies = require("../../assets/currencies.json");
@@ -13,36 +13,52 @@ export default function ValPicker() {
     const colorScheme = useColorScheme();
 
     const styles = colorScheme === "light" ? stylesLight : stylesDark
+    // @ts-ignore
+    const renderItems = useCallback(({item}) => (
+        <Link onPress={() => changeValue(ID.toString(), item.code).then(res => {
+            if (res === null) {
+                Toast.show("Error saving value", Toast.SHORT);
+            }
+        })} dismissTo href={"/"}>
+            <View style={styles.item}>
+                <View style={styles.fullNamePart}>
+                    <Text style={styles.itemText}>{item.fullName}</Text>
+                </View>
+                <View style={styles.codePart}>
+                    <Text style={styles.itemText}>{item.code}</Text>
+                </View>
+            </View>
+        </Link>
+    ), []);
+
+
+
+    console.log(currencies);
+
     return (<View style={{
         flex: 1,
         alignItems: "center",
         backgroundColor: colorScheme === "light" ? "white" : "black",
         justifyContent: "center"
     }}>
-        <View style={colorScheme === "light" ? {width: "100%", height: 0.2, backgroundColor: "#4C4C4C", opacity: 0.5} : {
-            width: "100%",
-            backgroundColor: "#ABABAB",
-            height: 0.2,
-            opacity: 0.5
-        }}/>
+        <View
+            style={colorScheme === "light" ? {width: "100%", height: 0.2, backgroundColor: "#4C4C4C", opacity: 0.5} : {
+                width: "100%",
+                backgroundColor: "#ABABAB",
+                height: 0.2,
+                opacity: 0.5,
+                alignItems: "center"
+            }}/>
 
-        <FlatList data={currencies} renderItem={({item}) => (
-            <Link onPress={() => changeValue(ID.toString(), item.code).then(res => {
-                if (res === null) {
-                    Toast.show("Error saving value", Toast.SHORT);
-                }
-            })} dismissTo href={"/"}>
-                <View style={styles.item}>
-                    <View style={styles.fullNamePart}>
-                        <Text style={styles.itemText}>{item.fullName}</Text>
-                    </View>
-                    <View style={styles.codePart}>
-                        <Text style={styles.itemText}>{item.code}</Text>
-                    </View>
+        <FlatList
+            data={currencies}
+            keyExtractor={(item) => item.code}
+            ListFooterComponent={() => (
+                <View style={{alignItems: "center"}}>
+                    <Text style={styles.itemText}>Select a value to change it</Text>
                 </View>
-            </Link>
-
-        )} style={{marginBottom: 12}}
+            )}
+            renderItem={renderItems} style={{marginBottom: 12}}
         />
 
     </View>)
@@ -51,17 +67,17 @@ export default function ValPicker() {
 
 const stylesLight = StyleSheet.create({
     item: {
-        padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#DDDDDD',
         flexDirection: 'row',
+        width: "80%",
     },
     fullNamePart: {
         marginLeft: 10,
-        width: 330 - 56,
+        width: "82%",
     },
     codePart: {
-        width: 56,
+        width: "18%",
         alignItems: 'center',
         justifyContent: 'center',
     },

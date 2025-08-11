@@ -125,27 +125,6 @@ export const getApiKey = async () => {
     }
 }
 
-export const updateSymbols = async (symbols: string) => {
-    try {
-        await AsyncStorage.setItem("symbols", symbols);
-        console.log("Cache Service: Symbols saved successfully:");
-        return true;
-    } catch (e) {
-        console.log("Cache Service: Error saving symbols:", e);
-        return false;
-    }
-}
-
-export const getSymbols = async () => {
-    try {
-        const symbols = await AsyncStorage.getItem("symbols");
-        return symbols && JSON.parse(symbols)?.success ? JSON.parse(symbols) : null;
-    } catch (e) {
-        console.log("Cache Service: Error retrieving symbols:", e);
-        return null;
-    }
-}
-
 export const getHistoryDiapason = async () => {
     try {
         const history = await AsyncStorage.getItem("history");

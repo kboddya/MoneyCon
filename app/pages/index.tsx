@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TextInput, View, useColorScheme} from "react-native";
+import {StyleSheet, Text, TextInput, View, useColorScheme, ScrollView} from "react-native";
 import {Link, router} from "expo-router";
 import {Row, Rows, Table} from "react-native-table-component";
 import {getTime, getValue} from "@/app/services/cacheService";
@@ -117,11 +117,14 @@ export default function Index() {
             <Text
                 style={styles.updated}>Updated: {time ? ((Date.now() - Date.parse(time)) / (1000 * 60 * 60)).toFixed(0) : "?"} hours
                 ago</Text>
+
+
             <View style={styles.textBoxAndValPicker}>
 
                 <View style={styles.valuePicker}>
                     <Link href={"/pages/ValPicker?ID=1"}>
-                        <View style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+                        <View
+                            style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
                             <Text style={styles.valueButtonText}>
                                 {values.firstVal ?? "?"}
                             </Text>
@@ -131,6 +134,7 @@ export default function Index() {
                 </View>
 
                 <View style={styles.border}/>
+
 
                 <TextInput
                     style={styles.textInput}
@@ -173,7 +177,8 @@ export default function Index() {
 
                 <View style={styles.valuePicker}>
                     <Link href={"/pages/ValPicker?ID=2"}>
-                        <View style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+                        <View
+                            style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
                             <Text style={styles.valueButtonText}>
                                 {values.secondVal ?? "?"}
                             </Text>
@@ -223,7 +228,8 @@ export default function Index() {
 
                 <View style={styles.valuePicker}>
                     <Link href={"/pages/ValPicker?ID=3"}>
-                        <View style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+                        <View
+                            style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
                             <Text style={styles.valueButtonText}>
                                 {values.thirdVal ?? "?"}
                             </Text>
@@ -272,7 +278,8 @@ export default function Index() {
 
                 <View style={styles.valuePicker}>
                     <Link href={"/pages/ValPicker?ID=4"}>
-                        <View style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
+                        <View
+                            style={{width: "100%", height: "100%", justifyContent: "center", alignItems: "center"}}>
                             <Text style={styles.valueButtonText}>
                                 {values.fourthVal ?? "?"}
                             </Text>
@@ -319,40 +326,40 @@ export default function Index() {
             </View>
 
             <View style={styles.excangeRateTabdle}>
+
                 <View style={styles.excangeRateTableHeader}>
                     <Text style={styles.tableHeader}>Exchange Rates</Text>
                 </View>
-                <View style={styles.placeExchangeRateTableTablet}>
-                    <Table>
-                        <Row data={["", "Rate", "Percent", values.firstVal]}
-                             textStyle={styles.tableText}
-                             style={{marginBottom: "5.3%"}}
-                        />
-                        <Rows
-                            data={[[values.secondVal, table.secondVal.currentVal, (table.secondVal.percentVal.includes("-") ? "" : "+") + table.secondVal.percentVal, ""]]}
-                            textStyle={styles.tableText}
-                            style={{
-                                paddingBottom: "4.5%",
-                                borderBottomWidth: 1,
-                                borderBottomColor: colorScheme === 'light' ? "#DDDDDD" : "#ABABAB"
-                            }}
-                        />
-                        <Rows
-                            data={[[values.thirdVal, table.thirdVal.currentVal, (table.thirdVal.percentVal.includes("-") ? "" : "+") + table.thirdVal.percentVal, ""]]}
-                            textStyle={styles.tableText} style={{
-                            paddingTop: "4.5%",
+
+                <Table style={styles.placeExchangeRateTableTablet}>
+                    <Row data={["", "Rate", "Percent", values.firstVal]}
+                         textStyle={styles.tableText}
+                         style={{marginBottom: "5.3%"}}
+                    />
+                    <Rows
+                        data={[[values.secondVal, table.secondVal.currentVal, (table.secondVal.percentVal.includes("-") ? "" : "+") + table.secondVal.percentVal, ""]]}
+                        textStyle={styles.tableText}
+                        style={{
                             paddingBottom: "4.5%",
                             borderBottomWidth: 1,
                             borderBottomColor: colorScheme === 'light' ? "#DDDDDD" : "#ABABAB"
                         }}
-                        />
-                        <Rows
-                            data={[[values.fourthVal, table.fourthVal.currentVal, (table.fourthVal.percentVal.includes("-") ? "" : "+") + table.fourthVal.percentVal, ""]]}
-                            textStyle={styles.tableText}
-                            style={{paddingTop: "4.5%", marginBottom: "8.3%"}}
-                        />
-                    </Table>
-                </View>
+                    />
+                    <Rows
+                        data={[[values.thirdVal, table.thirdVal.currentVal, (table.thirdVal.percentVal.includes("-") ? "" : "+") + table.thirdVal.percentVal, ""]]}
+                        textStyle={styles.tableText} style={{
+                        paddingTop: "4.5%",
+                        paddingBottom: "4.5%",
+                        borderBottomWidth: 1,
+                        borderBottomColor: colorScheme === 'light' ? "#DDDDDD" : "#ABABAB"
+                    }}
+                    />
+                    <Rows
+                        data={[[values.fourthVal, table.fourthVal.currentVal, (table.fourthVal.percentVal.includes("-") ? "" : "+") + table.fourthVal.percentVal, ""]]}
+                        textStyle={styles.tableText}
+                        style={{paddingTop: "4.5%", marginBottom: "8.3%"}}
+                    />
+                </Table>
             </View>
         </View>
 

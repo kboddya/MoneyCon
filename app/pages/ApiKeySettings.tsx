@@ -58,6 +58,7 @@ export default function ApiKeySettings() {
                 tintColor={colorScheme === "light" ? "#EFEFEF" : "#272525"}
                 activeFontStyle={styles.historyValue}
                 sliderStyle={{borderRadius: 10}}
+                tabIndex={-1}
                 onChange={event => {
                     switch (event.nativeEvent.value) {
                         case "1 day": {

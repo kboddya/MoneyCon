@@ -2,37 +2,9 @@ import {
     getApiKey,
     getExchangeRates, getHistorycalExchangeRates, getHistoryDiapason,
     getTime,
-    updateExchangeRates, updateHistorycalExchangeRates,
-    updateSymbols
+    updateExchangeRates, updateHistorycalExchangeRates
 } from "@/app/services/cacheService";
 
-export const getSymbolsFromApi = async (apiKey: string) => {
-    try {
-        const response = await fetch("https://api.exchangeratesapi.io/v1/symbols?access_key=" + apiKey);
-        if (!response.ok) {
-            throw new Error(`HTTP error status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data?.success) {
-            const symbols = JSON.stringify(data.symbols);
-            console.log("Symbols fetched successfully:", symbols);
-            if (await updateSymbols(symbols)) {
-                console.log("Symbols updated successfully");
-                return true;
-            } else {
-                console.error("Failed to update symbols");
-                return "102";
-            }
-        } else {
-            console.log(`Error ${data.error.code}: ${data.error.message}`);
-            throw data.error;
-            return data.error.message;
-        }
-    } catch (error) {
-        console.error("Error fetching symbols:", error);
-        return error; // Error code for fetching symbols
-    }
-}
 
 let exchangeRatesInWork = false;
 const getExchangeRatesFromApi = async (apiKey: string, force = false) => {
