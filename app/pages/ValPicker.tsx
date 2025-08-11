@@ -31,46 +31,54 @@ export default function ValPicker() {
         </Link>
     ), []);
 
-
-
-    console.log(currencies);
-
-    return (<View style={{
-        flex: 1,
-        alignItems: "center",
-        backgroundColor: colorScheme === "light" ? "white" : "black",
-        justifyContent: "center"
-    }}>
+    return (
         <View
-            style={colorScheme === "light" ? {width: "100%", height: 0.2, backgroundColor: "#4C4C4C", opacity: 0.5} : {
-                width: "100%",
-                backgroundColor: "#ABABAB",
-                height: 0.2,
-                opacity: 0.5,
-                alignItems: "center"
-            }}/>
+            style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: colorScheme === "light" ? "white" : "black",
+            }}
+        >
+            <View
+                style={colorScheme === "light" ? {
+                    width: "100%",
+                    height: 0.2,
+                    backgroundColor: "#4C4C4C",
+                    opacity: 0.5,
+                    alignItems: "center"
+                } : {
+                    width: "100%",
+                    backgroundColor: "#ABABAB",
+                    height: 0.2,
+                    opacity: 0.5,
+                    alignItems: "center"
+                }}
+            />
 
-        <FlatList
-            data={currencies}
-            keyExtractor={(item) => item.code}
-            ListFooterComponent={() => (
-                <View style={{alignItems: "center"}}>
-                    <Text style={styles.itemText}>Select a value to change it</Text>
-                </View>
-            )}
-            renderItem={renderItems} style={{marginBottom: 12}}
-        />
+            <FlatList
+                data={currencies}
+                keyExtractor={(item) => item.code}
+                ListFooterComponent={() => (
+                    <View style={{alignItems: "center"}}>
+                        <Text style={styles.itemText}>Select a value to change it</Text>
+                    </View>
+                )}
+                renderItem={renderItems}
+                style={{marginBottom: 12, width: "95%"}}
+            />
 
-    </View>)
-        ;
+        </View>
+    );
 }
 
 const stylesLight = StyleSheet.create({
     item: {
+        padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#DDDDDD',
         flexDirection: 'row',
-        width: "80%",
+        width: "100%",
     },
     fullNamePart: {
         marginLeft: 10,
@@ -93,13 +101,14 @@ const stylesDark = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ABABAB',
         flexDirection: 'row',
+        width: "100%",
     },
     fullNamePart: {
         marginLeft: 10,
-        width: 330 - 56,
+        width: "82%",
     },
     codePart: {
-        width: 56,
+        width: "18%",
         alignItems: 'center',
         justifyContent: 'center',
     },
