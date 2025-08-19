@@ -16,36 +16,47 @@ export const calculate = async (data: calcData) => {
         thirdVal: rates?.rates[data.val.thirdVal] ?? 1,
         fourthVal: rates?.rates[data.val.fourthVal] ?? 1,
     }
-
+    let isComma = false;
     switch (data.enterVal) {
         case 1: {
-            const convertedToBase = (Number.parseFloat(data.firstData.replace(" ", "")) / excnageRates.firstVal)
-            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(4);
-            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(4);
-            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(4);
+            isComma = data.firstData.includes(",");
+            const convertedToBase = (Number.parseFloat(data.firstData.replace(" ", "").replace(",", ".")) / excnageRates.firstVal)
+            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(2);
+            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(2);
+            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(2);
             break;
         }
         case 2: {
-            const convertedToBase = (Number.parseFloat(data.secondData.replace(" ", "")) / excnageRates.secondVal)
-            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(4);
-            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(4);
-            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(4);
+            isComma = data.secondData.includes(",");
+            const convertedToBase = (Number.parseFloat(data.secondData.replace(" ", "").replace(",", ".")) / excnageRates.secondVal)
+            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(2);
+            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(2);
+            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(2);
             break;
         }
         case 3: {
-            const convertedToBase = (Number.parseFloat(data.thirdData.replace(" ", "")) / excnageRates.thirdVal)
-            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(4);
-            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(4);
-            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(4);
+            isComma = data.thirdData.includes(",");
+            const convertedToBase = (Number.parseFloat(data.thirdData.replace(" ", "").replace(",", ".")) / excnageRates.thirdVal)
+            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(2);
+            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(2);
+            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(2);
             break;
         }
         case 4: {
-            const convertedToBase = (Number.parseFloat(data.fourthData.replace(" ", "")) / excnageRates.fourthVal)
-            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(4);
-            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(4);
-            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(4);
+            isComma = data.fourthData.includes(",");
+            const convertedToBase = (Number.parseFloat(data.fourthData.replace(" ", "").replace(",", ".")) / excnageRates.fourthVal)
+            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(2);
+            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(2);
+            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(2);
             break;
         }
+    }
+
+    if(isComma){
+        data.firstData = data.firstData.replace(".", ",");
+        data.secondData = data.secondData.replace(".", ",");
+        data.thirdData = data.thirdData.replace(".", ",");
+        data.fourthData = data.fourthData.replace(".", ",");
     }
 
     return data;

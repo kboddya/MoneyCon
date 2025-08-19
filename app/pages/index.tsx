@@ -9,24 +9,14 @@ import {calcData} from "@/app/entities/calcData";
 import Toast from "react-native-simple-toast"
 import {formatNumber} from "@/app/services/helper";
 
+const toUpdate = (text: string): boolean => {
+    if (text.includes("-") ||
+        (text.split(".").length - 1) + (text.split(",").length - 1) > 1) return false;
+    return true;
+}
+
 export default function Index() {
     const [errorStatus, setErrorStatus] = useState("");
-
-    useEffect(() => {
-        updateData().then(d => {
-            if (!d.success) {
-                setErrorStatus(d.error);
-            } else if (d.success && errorStatus !== "") {
-                setErrorStatus("");
-            }
-        });
-    });
-
-    useEffect(() => {
-        if (errorStatus === "Update already in progress") Toast.show("Update already in progress", Toast.LONG);
-        else if (errorStatus.includes("1000")) Toast.show("Error updating data. Please try again later.", Toast.LONG);
-        else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
-    }, [errorStatus]);
 
     const [values, setValues] = useState({
         firstVal: "",
@@ -71,6 +61,22 @@ export default function Index() {
     getValue().then(setValues)
 
     getTime().then(setTime);
+
+    useEffect(() => {
+        updateData().then(d => {
+            if (!d.success) {
+                setErrorStatus(d.error);
+            } else if (d.success && errorStatus !== "") {
+                setErrorStatus("");
+            }
+        });
+    }, [time]);
+
+    useEffect(() => {
+        if (errorStatus === "Update already in progress") Toast.show("Update already in progress", Toast.LONG);
+        else if (errorStatus.includes("1000")) Toast.show("Error updating data. Please try again later.", Toast.LONG);
+        else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
+    }, [errorStatus]);
 
     exchangeRateTable().then(data => {
             setTable(data ?? {
@@ -142,31 +148,19 @@ export default function Index() {
                     placeholder={"Enter amount"}
                     value={data.firstData !== "NaN" ? data.firstData : ""}
                     onChangeText={text => {
-                        setData({
-                            firstData: text,
-                            secondData: data.secondData,
-                            thirdData: data.thirdData,
-                            fourthData: data.fourthData,
-                        })
+                        if (!toUpdate(text)) return;
+                        data.firstData = text;
+                        setData(data)
                         calculate(new calcData(values, text, 1)).then(data => {
                             if (data == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
-                                setData({
-                                    firstData: data.firstData,
-                                    secondData: data.secondData,
-                                    thirdData: data.thirdData,
-                                    fourthData: data.fourthData,
-                                });
+                                setData(data)
                             }
                         });
                     }}
                     onSubmitEditing={e => {
-                        setData({
-                            firstData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
-                            secondData: data.secondData,
-                            thirdData: data.thirdData,
-                            fourthData: data.fourthData,
-                        })
+                        data.firstData = Number.parseFloat(e.nativeEvent.text).toFixed(2);
+                        setData(data)
                     }}
 
                 />
@@ -195,31 +189,19 @@ export default function Index() {
                     placeholder={"Enter amount"}
                     value={data.secondData !== "NaN" ? data.secondData : ""}
                     onChangeText={text => {
-                        setData({
-                            firstData: data.firstData,
-                            secondData: text,
-                            thirdData: data.thirdData,
-                            fourthData: data.fourthData,
-                        });
+                        if (!toUpdate(text)) return;
+                        data.secondData = text;
+                        setData(data);
                         calculate(new calcData(values, text, 2)).then(d => {
                             if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
-                                setData({
-                                    firstData: d.firstData,
-                                    secondData: d.secondData,
-                                    thirdData: d.thirdData,
-                                    fourthData: d.fourthData,
-                                });
+                                setData(d);
                             }
                         });
                     }}
                     onSubmitEditing={e => {
-                        setData({
-                            firstData: data.firstData,
-                            secondData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
-                            thirdData: data.thirdData,
-                            fourthData: data.fourthData,
-                        })
+                        data.secondData = Number.parseFloat(e.nativeEvent.text).toFixed(2);
+                        setData(data)
                     }}
                 />
             </View>
@@ -245,31 +227,19 @@ export default function Index() {
                     placeholder={"Enter amount"}
                     value={data.thirdData !== "NaN" ? data.thirdData : ""}
                     onChangeText={text => {
-                        setData({
-                            firstData: data.firstData,
-                            secondData: data.secondData,
-                            thirdData: text,
-                            fourthData: data.fourthData,
-                        });
+                        if (!toUpdate(text)) return;
+                        data.thirdData = text;
+                        setData(data);
                         calculate(new calcData(values, text, 3)).then(d => {
                             if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
-                                setData({
-                                    firstData: d.firstData,
-                                    secondData: d.secondData,
-                                    thirdData: d.thirdData,
-                                    fourthData: d.fourthData,
-                                });
+                                setData(d);
                             }
                         });
                     }}
                     onSubmitEditing={e => {
-                        setData({
-                            firstData: data.firstData,
-                            secondData: data.secondData,
-                            thirdData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
-                            fourthData: data.fourthData,
-                        })
+                        data.thirdData = Number.parseFloat(e.nativeEvent.text).toFixed(2);
+                        setData(data)
                     }}
                 />
             </View>
@@ -296,31 +266,19 @@ export default function Index() {
                     placeholder={"Enter amount"}
                     value={data.fourthData !== "NaN" ? data.fourthData : ""}
                     onChangeText={text => {
-                        setData({
-                            firstData: data.firstData,
-                            secondData: data.secondData,
-                            thirdData: data.thirdData,
-                            fourthData: text,
-                        });
+                        if (!toUpdate(text)) return;
+                        data.fourthData = text;
+                        setData(data);
                         calculate(new calcData(values, text, 4)).then(d => {
                             if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
                             else {
-                                setData({
-                                    firstData: d.firstData,
-                                    secondData: d.secondData,
-                                    thirdData: d.thirdData,
-                                    fourthData: d.fourthData,
-                                });
+                                setData(d);
                             }
                         });
                     }}
                     onSubmitEditing={e => {
-                        setData({
-                            firstData: data.firstData,
-                            secondData: data.secondData,
-                            thirdData: data.thirdData,
-                            fourthData: Number.parseFloat(e.nativeEvent.text).toFixed(4),
-                        })
+                        data.fourthData = Number.parseFloat(e.nativeEvent.text).toFixed(2);
+                        setData(data)
                     }}
                 />
             </View>

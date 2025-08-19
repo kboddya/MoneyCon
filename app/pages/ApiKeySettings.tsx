@@ -53,15 +53,16 @@ export default function ApiKeySettings() {
             <SegmentedControl
                 values={["1 day", "7 days", "30 days"]}
                 selectedIndex={history === 1 ? 0 : history === 7 ? 1 : history === 30 ? 2 : -1}
-                style={{...styles.historyContainer}}
+                style={styles.historyContainer}
                 fontStyle={styles.historyValue}
+                backgroundColor={colorScheme === "light" ? "#ffffff" : "#000000"}
                 tintColor={colorScheme === "light" ? "#EFEFEF" : "#272525"}
                 activeFontStyle={styles.historyValue}
                 sliderStyle={{borderRadius: 10}}
                 tabIndex={-1}
                 onChange={event => {
-                    switch (event.nativeEvent.value) {
-                        case "1 day": {
+                    switch (event.nativeEvent.selectedSegmentIndex) {
+                        case 0: {
                             if (history === 1) return;
                             setHistory(1);
                             setHistoryDiapason(1).then(result => {
@@ -72,7 +73,7 @@ export default function ApiKeySettings() {
                             });
                             break;
                         }
-                        case "7 days": {
+                        case 1: {
                             if (history === 7) return;
                             setHistory(7);
                             setHistoryDiapason(7).then(result => {
@@ -83,7 +84,7 @@ export default function ApiKeySettings() {
                             });
                             break;
                         }
-                        case "30 days": {
+                        case 2: {
                             if (history === 30) return;
                             setHistory(30);
                             setHistoryDiapason(30).then(result => {

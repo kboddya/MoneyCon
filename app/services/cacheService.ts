@@ -85,18 +85,6 @@ export const getTime = async () => {
     }
 }
 
-export const updateTime = async () => {
-    try {
-        const currentTime = new Date(Date.now()).toString();
-        await AsyncStorage.setItem("time", currentTime);
-        console.log("Cache Service: Time updated successfully:", new Date(currentTime).getDate());
-        return true;
-    } catch (e) {
-        console.log("Cache Service: Error updating time:", e);
-        return false;
-    }
-}
-
 export const setApiKey = async (key: string) => {
     return await updateData(true, key)
         .then(async result => {
@@ -143,6 +131,7 @@ export const setHistoryDiapason = async (value: number) => {
         await AsyncStorage.setItem("history", value.toString());
         await AsyncStorage.setItem("timeHistory", new Date(Date.now()).toString())
         console.log("Cache Service: History diapason updated successfully:", value);
+        await updateData();
         return true;
     } catch (e) {
         console.log("Cache Service: Error updating history diapason:", e);
