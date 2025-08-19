@@ -3,7 +3,7 @@
     <h1>MoneyCon</h1>
     <p>MoneyCon is a simple way to convert on currency to another!</p>
     <p>Built with <a href="https://reactnative.dev/">React Native</a> and <a href="https://expo.dev/">Expo</a></p>
-    <a href="##screenshots">Screenshots</a>&middot;<a href="https://github.com/kboddya/MoneyCon/releases">Releases</a>
+    <a href="#screenshots">Screenshots</a>&middot;<a href="https://github.com/kboddya/MoneyCon/releases">Releases</a>
 </div>
 
 ## About
