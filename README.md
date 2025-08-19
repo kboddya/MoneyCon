@@ -3,9 +3,6 @@
     <h1>MoneyCon</h1>
     <p>MoneyCon is a simple way to convert on currency to another!</p>
     <p>Built with <a href="https://reactnative.dev/">React Native</a> and <a href="https://expo.dev/">Expo</a></p>
-    <p>Powered by <a href="https://exchangeratesapi.io/">exchangeratesapi.io</a></p>
-    <p>Icons by <a href="https://icons8.com/">Icons8</a></p>
-    <p>Logo by <a href="htpps://chatgpt.com/">ChatGPT</a></p>
     <a href="##screenshots">Screenshots</a>&middot;<a href="https://github.com/kboddya/MoneyCon/releases">Releases</a>
 </div>
 
@@ -28,5 +25,9 @@ npm install
 npx expo start
 ```
 You can then scan the QR code with the expo app on your phone or run the app in an emulator.
+## License Notices
+Powered by [exchangeratesapi.io](https://exchangeratesapi.io/)\
+Icons by [Icons8](https://icons8.com/)\
+Logo by [ChatGPT](https://chatgpt.com/)
 ## LICENSE
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
