@@ -2,8 +2,11 @@
     <img src="assets/images/logo-by-chatgpt.png" width="150" height="150"/>
     <h1>MoneyCon</h1>
     <p>MoneyCon is a simple way to convert on currency to another!</p>
+    <p>Built with <a href="https://reactnative.dev/">React Native</a> and <a href="https://expo.dev/">Expo</a></p>
     <p>Powered by <a href="https://exchangeratesapi.io/">exchangeratesapi.io</a></p>
-    <a href="##Screenshots">Screenshots</a>&middot;<a href="https://github.com/kboddya/MoneyCon/releases">Releases</a>
+    <p>Icons by <a href="https://icons8.com/">Icons8</a></p>
+    <p>Logo by <a href="htpps://chatgpt.com/">ChatGPT</a></p>
+    <a href="##screenshots">Screenshots</a>&middot;<a href="https://github.com/kboddya/MoneyCon/releases">Releases</a>
 </div>
 
 ## About
