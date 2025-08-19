@@ -24,7 +24,7 @@ export default function RootLayout() {
         }}>
             <Stack.Screen name={"index"} options={{
                 title: "MoneyCon",
-                headerRight: () => <Link href={"/pages/ApiKeySettings"} style={{backgroundSize: 40}}><Image
+                headerRight: () => <Link href={"/pages/ApiKeySettings"} style={{width: 40, height: 40}}><Image
                     style={{
                         width: 25,
                         height: 25,
