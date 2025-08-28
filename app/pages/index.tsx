@@ -8,6 +8,7 @@ import {calculate, exchangeRateTable} from "@/app/services/calcService";
 import {calcData} from "@/app/entities/calcData";
 import Toast from "react-native-simple-toast"
 import {formatNumber} from "@/app/services/helper";
+import * as Network from "expo-network";
 
 const toUpdate = (text: string): boolean => {
     if (text.includes("-") ||
@@ -16,6 +17,20 @@ const toUpdate = (text: string): boolean => {
 }
 
 export default function Index() {
+    const [networkStatus, setNetworkStatus] = useState({
+        type: Network.NetworkStateType.UNKNOWN,
+        isConnected: false,
+        isInternetReachable: false
+    });
+
+    Network.getNetworkStateAsync().then(state => {
+        setNetworkStatus({
+            type: state.type ?? Network.NetworkStateType.UNKNOWN,
+            isConnected: state.isConnected ?? false,
+            isInternetReachable: state.isInternetReachable ?? false
+        });
+    });
+
     const [errorStatus, setErrorStatus] = useState("");
 
     const [values, setValues] = useState({
@@ -63,6 +78,11 @@ export default function Index() {
     getTime().then(setTime);
 
     useEffect(() => {
+        if (!networkStatus.isConnected || !networkStatus.isInternetReachable) {
+            setErrorStatus("No internet connection");
+            console.log(networkStatus);
+            return;
+        }
         updateData().then(d => {
             if (!d.success) {
                 setErrorStatus(d.error);
@@ -70,12 +90,13 @@ export default function Index() {
                 setErrorStatus("");
             }
         });
-    }, [time]);
+    }, [time, networkStatus.isConnected, networkStatus.isInternetReachable, networkStatus.type]);
 
     useEffect(() => {
         if (errorStatus === "Update already in progress") Toast.show("Update already in progress", Toast.LONG);
         else if (errorStatus.includes("1000")) Toast.show("Error updating data. Please try again later.", Toast.LONG);
         else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
+        else if (errorStatus === "No internet connection") Toast.show("App work's in offline mode", Toast.LONG);
     }, [errorStatus]);
 
     exchangeRateTable().then(data => {

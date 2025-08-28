@@ -4,8 +4,24 @@ import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/ap
 import React, {useState} from "react";
 import {errorDescription} from "@/app/services/helper";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
+import Toast from "react-native-simple-toast";
+import * as Network from "expo-network";
 
 export default function ApiKeySettings() {
+    const [networkStatus, setNetworkStatus] = useState({
+        type: Network.NetworkStateType.UNKNOWN,
+        isConnected: false,
+        isInternetReachable: false
+    });
+
+    Network.getNetworkStateAsync().then(state => {
+        setNetworkStatus({
+            type: state.type ?? Network.NetworkStateType.UNKNOWN,
+            isConnected: state.isConnected ?? false,
+            isInternetReachable: state.isInternetReachable ?? false
+        });
+    });
+
 
     const [apiKey, setApiKeyState] = useState("");
     getApiKey().then(setApiKeyState)
@@ -66,6 +82,10 @@ export default function ApiKeySettings() {
                             if (history === 1) return;
                             setHistory(1);
                             setHistoryDiapason(1).then(result => {
+                                if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                                    Toast.show("Exchange rates will be updated when you have internet connection", Toast.LONG);
+                                    return;
+                                }
                                 if (!result) {
                                     setHistory(0);
                                     Alert.alert("Error saving history diapason. Please try again.");
@@ -77,6 +97,10 @@ export default function ApiKeySettings() {
                             if (history === 7) return;
                             setHistory(7);
                             setHistoryDiapason(7).then(result => {
+                                if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                                    Toast.show("Exchange rates will be updated when you have internet connection", Toast.LONG);
+                                    return;
+                                }
                                 if (!result) {
                                     setHistory(0);
                                     Alert.alert("Error saving history diapason. Please try again.");
@@ -88,6 +112,10 @@ export default function ApiKeySettings() {
                             if (history === 30) return;
                             setHistory(30);
                             setHistoryDiapason(30).then(result => {
+                                if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                                    Toast.show("Exchange rates will be updated when you have internet connection", Toast.LONG);
+                                    return;
+                                }
                                 if (!result) {
                                     setHistory(0);
                                     Alert.alert("Error saving history diapason. Please try again.");
@@ -116,6 +144,7 @@ export default function ApiKeySettings() {
                     keyboardType="default"
                     autoCorrect={false}
                     scrollEnabled={false}
+                    editable={false}
                     onSubmitEditing={e => {
                         setApiKey(e.nativeEvent.text)
                             .then(result => {
