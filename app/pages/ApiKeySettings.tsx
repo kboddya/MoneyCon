@@ -146,7 +146,7 @@ export default function ApiKeySettings() {
                     keyboardType="default"
                     autoCorrect={false}
                     scrollEnabled={false}
-                    editable={networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)}
+                    editable={networkStatus.isChanged && !(!networkStatus.isConnected || !networkStatus.isInternetReachable)}
                     onTouchEnd={() => {
                         if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                             Toast.show("No internet connection", Toast.SHORT);
