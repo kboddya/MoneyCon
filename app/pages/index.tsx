@@ -6,7 +6,7 @@ import {updateData} from "@/app/services/apiService";
 import React, {useEffect, useState} from "react";
 import {calculate, exchangeRateTable} from "@/app/services/calcService";
 import {calcData} from "@/app/entities/calcData";
-import Toast from "react-native-simple-toast"
+import Toast from "react-native-toast-message"
 import {formatNumber} from "@/app/services/helper";
 import * as Network from "expo-network";
 
@@ -101,10 +101,19 @@ export default function Index() {
     }, [time, networkStatus.isConnected, networkStatus.isInternetReachable, networkStatus.type]);
 
     useEffect(() => {
-        if (errorStatus === "Update already in progress") Toast.show("Update already in progress", Toast.LONG);
-        else if (errorStatus.includes("1000")) Toast.show("Error updating data. Please try again later.", Toast.LONG);
+        if (errorStatus === "Update already in progress") Toast.show({
+            text1: "Update already in progress",
+            type: "info",
+        });
+        else if (errorStatus.includes("1000")) Toast.show({
+            text1: "Error updating data. Please try again later.",
+            type: "error",
+        });
         else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
-        else if (errorStatus === "No internet connection") Toast.show("App work's in offline mode", Toast.LONG);
+        else if (errorStatus === "No internet connection") Toast.show({
+            text1: "App work's in offline mode",
+            type: "info"
+        });
     }, [errorStatus]);
 
     exchangeRateTable().then(data => {
@@ -181,7 +190,11 @@ export default function Index() {
                         data.firstData = text;
                         setData(data)
                         calculate(new calcData(values, text, 1)).then(data => {
-                            if (data == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
+                            if (data == null) Toast.show({
+                                text1: "Exchange rates are not available. Please try again later.",
+                                type: "error",
+                                position: "bottom"
+                            });
                             else {
                                 setData(data)
                             }
@@ -222,7 +235,11 @@ export default function Index() {
                         data.secondData = text;
                         setData(data);
                         calculate(new calcData(values, text, 2)).then(d => {
-                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
+                            if (d == null) Toast.show({
+                                text1: "Exchange rates are not available. Please try again later.",
+                                type: "error",
+                                position: "bottom"
+                            });
                             else {
                                 setData(d);
                             }
@@ -260,7 +277,11 @@ export default function Index() {
                         data.thirdData = text;
                         setData(data);
                         calculate(new calcData(values, text, 3)).then(d => {
-                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
+                            if (d == null) Toast.show({
+                                text1: "Exchange rates are not available. Please try again later.",
+                                type: "error",
+                                position: "bottom"
+                            });
                             else {
                                 setData(d);
                             }
@@ -299,7 +320,11 @@ export default function Index() {
                         data.fourthData = text;
                         setData(data);
                         calculate(new calcData(values, text, 4)).then(d => {
-                            if (d == null) Toast.show("Exchange rates are not available. Please try again later.", Toast.SHORT);
+                            if (d == null) Toast.show({
+                                text1: "Exchange rates are not available. Please try again later.",
+                                type: "error",
+                                position: "bottom"
+                            });
                             else {
                                 setData(d);
                             }
@@ -348,6 +373,7 @@ export default function Index() {
                     />
                 </Table>
             </View>
+            <Toast/>
         </View>
 
     );

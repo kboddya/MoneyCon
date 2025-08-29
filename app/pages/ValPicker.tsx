@@ -2,7 +2,7 @@ import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
 import {Link, useLocalSearchParams} from "expo-router";
 import {changeValue} from "@/app/services/cacheService";
 import React, {useCallback, useEffect, useState} from "react";
-import Toast from "react-native-simple-toast";
+import Toast from "react-native-toast-message";
 
 const currencies = require("../../assets/currencies.json");
 
@@ -17,7 +17,11 @@ export default function ValPicker() {
     const renderItems = useCallback(({item}) => (
         <Link onPress={() => changeValue(ID.toString(), item.code).then(res => {
             if (res === null) {
-                Toast.show("Error saving value", Toast.SHORT);
+                Toast.show({
+                    text1: "Error saving value",
+                    type: "error",
+                    position: "bottom",
+                });
             }
         })} dismissTo href={"/"}>
             <View style={styles.item}>
@@ -67,7 +71,7 @@ export default function ValPicker() {
                 renderItem={renderItems}
                 style={{marginBottom: 12, width: "95%"}}
             />
-
+            <Toast/>
         </View>
     );
 }

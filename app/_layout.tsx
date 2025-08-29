@@ -2,7 +2,7 @@ import {Link, router, Stack} from "expo-router";
 import {Alert, useColorScheme} from "react-native";
 import {updateData} from "@/app/services/apiService";
 import {Image} from "expo-image";
-import Toast from "react-native-simple-toast"
+import Toast from "react-native-toast-message"
 import {errorDescription} from "@/app/services/helper";
 import {useState} from "react";
 import {useNetworkState, NetworkStateType} from "expo-network";
@@ -62,14 +62,26 @@ export default function RootLayout() {
                            source={networkStatus.isChanged && (!networkStatus.isConnected || networkStatus.isInternetReachable) === null ? null : (theme === 'light' ? require("../assets/images/reload-light.png") : require("../assets/images/reload-dark.png"))}
                            onTouchEnd={event => {
                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
-                                   Toast.show("No internet connection", Toast.SHORT);
+                                   Toast.show({
+                                       text1: "No internet connection",
+                                       type: "error",
+                                       position: "bottom"
+                                   });
                                    return;
                                }
 
-                               Toast.show("Updating data...", Toast.SHORT);
+                               Toast.show({
+                                   text1: "Updating data...",
+                                   type: "info",
+                                   position: "bottom"
+                               });
                                updateData(true).then(data => {
                                    if (data.success) {
-                                       Toast.show("Data updated successfully", Toast.SHORT);
+                                       Toast.show({
+                                           text1: "Data updated successfully",
+                                           type: "success",
+                                           position: "bottom"
+                                       });
                                        router.dismissTo("/");
                                    } else {
                                        Alert.alert("Error updating data", errorDescription(data.error));
