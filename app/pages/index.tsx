@@ -1,12 +1,12 @@
 import {StyleSheet, Text, TextInput, View, useColorScheme, BackHandler, Alert} from "react-native";
-import {Link, router} from "expo-router";
+import {Link, router, useLocalSearchParams} from "expo-router";
 import {Row, Rows, Table} from "react-native-table-component";
 import {getTime, getValue} from "@/app/services/cacheService";
 import {updateData} from "@/app/services/apiService";
 import React, {useEffect, useState} from "react";
 import {calculate, exchangeRateTable} from "@/app/services/calcService";
 import {calcData} from "@/app/entities/calcData";
-import Toast from "react-native-toast-message"
+import ToastProvider, {Toast} from "toastify-react-native"
 import {formatNumber} from "@/app/services/helper";
 import * as Network from "expo-network";
 
@@ -88,7 +88,6 @@ export default function Index() {
                     {text: "Try again", onPress: () => null}
                 ]);
             }
-            console.log(networkStatus);
             return;
         }
         updateData().then(d => {
@@ -101,18 +100,24 @@ export default function Index() {
     }, [time, networkStatus.isConnected, networkStatus.isInternetReachable, networkStatus.type]);
 
     useEffect(() => {
+        console.log(errorStatus)
         if (errorStatus === "Update already in progress") Toast.show({
             text1: "Update already in progress",
             type: "info",
         });
         else if (errorStatus.includes("1000")) Toast.show({
-            text1: "Error updating data. Please try again later.",
-            type: "error",
+            text1: "Error updating data",
+            text2: "You can still use the app with the old data.",
+            type: "warn",
         });
         else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
         else if (errorStatus === "No internet connection") Toast.show({
             text1: "App work's in offline mode",
-            type: "info"
+            type: "warn"
+        });
+        else if (errorStatus === "Data updated successfully") Toast.show({
+            text1: "Data updated successfully",
+            type: "success"
         });
     }, [errorStatus]);
 
@@ -136,6 +141,15 @@ export default function Index() {
 
     const colorScheme = useColorScheme();
     const styles = StyleSheet.create(colorScheme === 'dark' ? stylesDark : stylesLight);
+
+    const {updated} = useLocalSearchParams();
+    useEffect(() => {
+        if (updated?.toString() === "true") {
+            router.setParams({updated: null});
+            setErrorStatus("Data updated successfully");
+        }
+    });
+
 
     return (
         <View
@@ -192,8 +206,7 @@ export default function Index() {
                         calculate(new calcData(values, text, 1)).then(data => {
                             if (data == null) Toast.show({
                                 text1: "Exchange rates are not available. Please try again later.",
-                                type: "error",
-                                position: "bottom"
+                                type: "error"
                             });
                             else {
                                 setData(data)
@@ -237,8 +250,7 @@ export default function Index() {
                         calculate(new calcData(values, text, 2)).then(d => {
                             if (d == null) Toast.show({
                                 text1: "Exchange rates are not available. Please try again later.",
-                                type: "error",
-                                position: "bottom"
+                                type: "error"
                             });
                             else {
                                 setData(d);
@@ -279,8 +291,7 @@ export default function Index() {
                         calculate(new calcData(values, text, 3)).then(d => {
                             if (d == null) Toast.show({
                                 text1: "Exchange rates are not available. Please try again later.",
-                                type: "error",
-                                position: "bottom"
+                                type: "error"
                             });
                             else {
                                 setData(d);
@@ -322,8 +333,7 @@ export default function Index() {
                         calculate(new calcData(values, text, 4)).then(d => {
                             if (d == null) Toast.show({
                                 text1: "Exchange rates are not available. Please try again later.",
-                                type: "error",
-                                position: "bottom"
+                                type: "error"
                             });
                             else {
                                 setData(d);
@@ -373,9 +383,13 @@ export default function Index() {
                     />
                 </Table>
             </View>
-            <Toast/>
+            <ToastProvider
+                position="bottom"
+                showCloseIcon={false}
+                showProgressBar={false}
+                theme={colorScheme === "light" ? "light" : "dark"}
+            />
         </View>
-
     );
 }
 

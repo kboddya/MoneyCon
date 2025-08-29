@@ -2,10 +2,9 @@ import {Link, router, Stack} from "expo-router";
 import {Alert, useColorScheme} from "react-native";
 import {updateData} from "@/app/services/apiService";
 import {Image} from "expo-image";
-import Toast from "react-native-toast-message"
+import ToastProvider, {Toast} from "toastify-react-native"
 import {errorDescription} from "@/app/services/helper";
 import {useState} from "react";
-import {useNetworkState, NetworkStateType} from "expo-network";
 import * as Network from "expo-network";
 
 export const unstable_settings = {
@@ -59,31 +58,35 @@ export default function RootLayout() {
                 headerTitleAlign: "center",
                 headerRight: () =>
                     <Image style={{width: 25, height: 25, padding: 11}}
-                           source={networkStatus.isChanged && (!networkStatus.isConnected || networkStatus.isInternetReachable) === null ? null : (theme === 'light' ? require("../assets/images/reload-light.png") : require("../assets/images/reload-dark.png"))}
+                           source={theme === 'light' ? require("../assets/images/reload-light.png") : require("../assets/images/reload-dark.png")}
                            onTouchEnd={event => {
                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                    Toast.show({
                                        text1: "No internet connection",
+                                       text2: "Please check your connection and try again",
                                        type: "error",
-                                       position: "bottom"
+                                       position: "bottom",
+                                       visibilityTime: 3000
                                    });
                                    return;
                                }
 
                                Toast.show({
                                    text1: "Updating data...",
+                                   text2: "Please wait",
                                    type: "info",
-                                   position: "bottom"
+                                   position: "bottom",
+                                   visibilityTime: 5000,
+                                   theme: theme === 'light' ? "light" : "dark",
+                                   closeIcon: null
                                });
+
                                updateData(true).then(data => {
                                    if (data.success) {
-                                       Toast.show({
-                                           text1: "Data updated successfully",
-                                           type: "success",
-                                           position: "bottom"
-                                       });
-                                       router.dismissTo("/");
+                                       Toast.hide();
+                                       router.dismissTo("/?updated=true");
                                    } else {
+                                       Toast.hide();
                                        Alert.alert("Error updating data", errorDescription(data.error));
                                    }
                                })

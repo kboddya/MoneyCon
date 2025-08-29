@@ -2,7 +2,7 @@ import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
 import {Link, useLocalSearchParams} from "expo-router";
 import {changeValue} from "@/app/services/cacheService";
 import React, {useCallback, useEffect, useState} from "react";
-import Toast from "react-native-toast-message";
+import ToastProvider, {Toast} from "toastify-react-native"
 
 const currencies = require("../../assets/currencies.json");
 
@@ -71,7 +71,9 @@ export default function ValPicker() {
                 renderItem={renderItems}
                 style={{marginBottom: 12, width: "95%"}}
             />
-            <Toast/>
+            <ToastProvider
+                position="bottom"
+            />
         </View>
     );
 }

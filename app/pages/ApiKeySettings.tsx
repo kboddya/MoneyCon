@@ -4,7 +4,7 @@ import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/ap
 import React, {useState} from "react";
 import {errorDescription} from "@/app/services/helper";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-import Toast from "react-native-toast-message";
+import ToastProvider, {Toast} from "toastify-react-native";
 import * as Network from "expo-network";
 
 export default function ApiKeySettings() {
@@ -87,7 +87,7 @@ export default function ApiKeySettings() {
                                 if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                     Toast.show({
                                         text1: "Exchange rates will be updated when you have internet connection",
-                                        type: "info",
+                                        type: "warn",
                                         position: "bottom"
                                     });
                                     return;
@@ -106,7 +106,7 @@ export default function ApiKeySettings() {
                                 if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                     Toast.show({
                                         text1: "Exchange rates will be updated when you have internet connection",
-                                        type: "info",
+                                        type: "warn",
                                         position: "bottom"
                                     });
                                     return;
@@ -125,7 +125,7 @@ export default function ApiKeySettings() {
                                 if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                     Toast.show({
                                         text1: "Exchange rates will be updated when you have internet connection",
-                                        type: "info",
+                                        type: "warn",
                                         position: "bottom"
                                     });
                                     return;
@@ -169,8 +169,16 @@ export default function ApiKeySettings() {
                         }
                     }}
                     onSubmitEditing={e => {
+                        Toast.show({
+                            text1: "Saving API key...",
+                            text2: "We'll verify your key and save it",
+                            type: "info",
+                            visibilityTime: 4000,
+                            useModal: true
+                        })
                         setApiKey(e.nativeEvent.text)
                             .then(result => {
+                                Toast.hide();
                                 if ((typeof result === "object" && !result.success) || result === false) {
                                     Alert.alert("Error", errorDescription(!result ? "" : result.error), [
                                         {
@@ -204,7 +212,11 @@ export default function ApiKeySettings() {
                 You can get your API key from <Link href={"https://exchangeratesapi.io/"}
                                                     style={colorScheme === "light" ? {color: "blue"} : {color: "#6599ff"}}>exchangerates</Link>
             </Text>
-            <Toast/>
+            <ToastProvider
+                showCloseIcon={false}
+                position="bottom"
+                theme={colorScheme === "light" ? "light" : "dark"}
+            />
         </View>
     );
 }
