@@ -5,7 +5,6 @@ import {Image} from "expo-image";
 import Toast from "react-native-simple-toast"
 import {errorDescription} from "@/app/services/helper";
 import {useState} from "react";
-import networkData from "@/app/entities/networkData";
 import {useNetworkState, NetworkStateType} from "expo-network";
 import * as Network from "expo-network";
 
@@ -17,14 +16,16 @@ export default function RootLayout() {
     const [networkStatus, setNetworkStatus] = useState({
         type: Network.NetworkStateType.UNKNOWN,
         isConnected: false,
-        isInternetReachable: false
+        isInternetReachable: false,
+        isChanged: false
     });
 
     Network.getNetworkStateAsync().then(state => {
         setNetworkStatus({
             type: state.type ?? Network.NetworkStateType.UNKNOWN,
             isConnected: state.isConnected ?? false,
-            isInternetReachable: state.isInternetReachable ?? false
+            isInternetReachable: state.isInternetReachable ?? false,
+            isChanged: true
         });
     });
 
@@ -58,9 +59,9 @@ export default function RootLayout() {
                 headerTitleAlign: "center",
                 headerRight: () =>
                     <Image style={{width: 25, height: 25, padding: 11}}
-                           source={!networkStatus.isConnected || networkStatus.isInternetReachable === null ? null : (theme === 'light' ? require("../assets/images/reload-light.png") : require("../assets/images/reload-dark.png"))}
+                           source={networkStatus.isChanged && (!networkStatus.isConnected || networkStatus.isInternetReachable) === null ? null : (theme === 'light' ? require("../assets/images/reload-light.png") : require("../assets/images/reload-dark.png"))}
                            onTouchEnd={event => {
-                               if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                               if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                    Toast.show("No internet connection", Toast.SHORT);
                                    return;
                                }

@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TextInput, View, useColorScheme, ScrollView} from "react-native";
+import {StyleSheet, Text, TextInput, View, useColorScheme, BackHandler, Alert} from "react-native";
 import {Link, router} from "expo-router";
 import {Row, Rows, Table} from "react-native-table-component";
 import {getTime, getValue} from "@/app/services/cacheService";
@@ -20,14 +20,16 @@ export default function Index() {
     const [networkStatus, setNetworkStatus] = useState({
         type: Network.NetworkStateType.UNKNOWN,
         isConnected: false,
-        isInternetReachable: false
+        isInternetReachable: false,
+        isChanged: false
     });
 
     Network.getNetworkStateAsync().then(state => {
         setNetworkStatus({
             type: state.type ?? Network.NetworkStateType.UNKNOWN,
             isConnected: state.isConnected ?? false,
-            isInternetReachable: state.isInternetReachable ?? false
+            isInternetReachable: state.isInternetReachable ?? false,
+            isChanged: true
         });
     });
 
@@ -78,8 +80,14 @@ export default function Index() {
     getTime().then(setTime);
 
     useEffect(() => {
-        if (!networkStatus.isConnected || !networkStatus.isInternetReachable) {
+        if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
             setErrorStatus("No internet connection");
+            if (time === "") {
+                Alert.alert("No internet connection", "You have not saved any exchange rates. Please connect to the internet.", [
+                    {text: "Close app", onPress: () => BackHandler.exitApp()},
+                    {text: "Try again", onPress: () => null}
+                ]);
+            }
             console.log(networkStatus);
             return;
         }

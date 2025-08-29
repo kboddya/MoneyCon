@@ -11,14 +11,16 @@ export default function ApiKeySettings() {
     const [networkStatus, setNetworkStatus] = useState({
         type: Network.NetworkStateType.UNKNOWN,
         isConnected: false,
-        isInternetReachable: false
+        isInternetReachable: false,
+        isChanged: false
     });
 
     Network.getNetworkStateAsync().then(state => {
         setNetworkStatus({
             type: state.type ?? Network.NetworkStateType.UNKNOWN,
             isConnected: state.isConnected ?? false,
-            isInternetReachable: state.isInternetReachable ?? false
+            isInternetReachable: state.isInternetReachable ?? false,
+            isChanged: true
         });
     });
 
@@ -82,7 +84,7 @@ export default function ApiKeySettings() {
                             if (history === 1) return;
                             setHistory(1);
                             setHistoryDiapason(1).then(result => {
-                                if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                     Toast.show("Exchange rates will be updated when you have internet connection", Toast.LONG);
                                     return;
                                 }
@@ -97,7 +99,7 @@ export default function ApiKeySettings() {
                             if (history === 7) return;
                             setHistory(7);
                             setHistoryDiapason(7).then(result => {
-                                if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                     Toast.show("Exchange rates will be updated when you have internet connection", Toast.LONG);
                                     return;
                                 }
@@ -112,7 +114,7 @@ export default function ApiKeySettings() {
                             if (history === 30) return;
                             setHistory(30);
                             setHistoryDiapason(30).then(result => {
-                                if (!networkStatus.isConnected || networkStatus.isInternetReachable === null) {
+                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
                                     Toast.show("Exchange rates will be updated when you have internet connection", Toast.LONG);
                                     return;
                                 }
@@ -144,7 +146,12 @@ export default function ApiKeySettings() {
                     keyboardType="default"
                     autoCorrect={false}
                     scrollEnabled={false}
-                    editable={false}
+                    editable={networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)}
+                    onTouchEnd={() => {
+                        if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
+                            Toast.show("No internet connection", Toast.SHORT);
+                        }
+                    }}
                     onSubmitEditing={e => {
                         setApiKey(e.nativeEvent.text)
                             .then(result => {
