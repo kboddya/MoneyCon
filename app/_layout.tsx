@@ -94,7 +94,21 @@ export default function RootLayout() {
             }}/>
             <Stack.Screen name={"pages/ValPicker"} options={{
                 title: "Change Value",
-                headerTitleAlign: "center"
+                headerTitleAlign: "center",
+                headerBackTitle: "Back",
+                presentation: "modal",
+            }}/>
+
+            <Stack.Screen name={"pages/welcome/index"} options={{
+                presentation: "modal"
+            }}/>
+            <Stack.Screen name={"pages/welcome/Signup"} options={{
+                headerShown: false,
+                presentation: "modal"
+            }}/>
+            <Stack.Screen name={"pages/welcome/Settings"} options={{
+                headerShown: false,
+                presentation: "modal"
             }}/>
         </Stack>
     );
