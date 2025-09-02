@@ -19,6 +19,7 @@ export const stylesLight = StyleSheet.create({
         color: '#4C4C4C',
         alignSelf: "flex-start",
         marginBottom: 5,
+        paddingLeft: 5
     },
     descriptionText: {
         fontSize: 16,
@@ -40,11 +41,16 @@ export const stylesLight = StyleSheet.create({
         justifyContent: "flex-start",
         width: '80%',
         alignItems: "flex-start",
+        marginBottom: "10%",
     },
     input: {
         width: '100%',
         paddingLeft: 10,
         color: '#4C4C4C',
+        fontSize: 18,
+        borderRadius: 10,
+        borderWidth: 1,
+        backgroundColor: '#EFEFEF',
     },
 });
 
@@ -67,6 +73,7 @@ export const stylesDark = StyleSheet.create({
         color: '#ABABAB',
         alignSelf: "flex-start",
         marginBottom: 5,
+        paddingLeft: 5
     },
     descriptionText: {
         fontSize: 16,
@@ -88,10 +95,15 @@ export const stylesDark = StyleSheet.create({
         justifyContent: "flex-start",
         width: '80%',
         alignItems: "flex-start",
+        marginBottom: "10%",
     },
     input: {
         width: '100%',
         paddingLeft: 10,
-        color: '#ABABAB',
+        color: 'white',
+        fontSize: 18,
+        borderRadius: 10,
+        borderWidth: 1,
+        backgroundColor: '#272525',
     },
 })

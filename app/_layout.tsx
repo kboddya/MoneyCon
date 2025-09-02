@@ -6,10 +6,12 @@ import ToastProvider, {Toast} from "toastify-react-native"
 import {errorDescription} from "@/app/services/helper";
 import {useState} from "react";
 import * as Network from "expo-network";
+import * as SplashScreen from "expo-splash-screen"
 
 export const unstable_settings = {
     initialRouteName: "/pages", // Set the initial route to the index page
 }
+
 
 export default function RootLayout() {
     const [networkStatus, setNetworkStatus] = useState({
@@ -97,10 +99,6 @@ export default function RootLayout() {
                 headerTitleAlign: "center",
                 headerBackTitle: "Back",
                 presentation: "modal",
-            }}/>
-
-            <Stack.Screen name={"pages/welcome/index"} options={{
-                presentation: "modal"
             }}/>
             <Stack.Screen name={"pages/welcome/Signup"} options={{
                 headerShown: false,

@@ -5,12 +5,16 @@ import ToastProvider, {Toast} from "toastify-react-native";
 import {errorDescription} from "@/app/services/helper";
 import {stylesLight, stylesDark} from "@/assets/styles/welcome/Settings";
 import * as Clipboard from "expo-clipboard";
-import {Link} from "expo-router";
+import {Link, router} from "expo-router";
+import {replace} from "expo-router/build/global-state/routing";
 
 export default function Settings() {
     const [value, setValue] = useState("");
     const [isSaved, setIsSaved] = useState(false);
     const [isPasteble, setIsPasteble] = useState(false);
+
+    const ColorScheme = useColorScheme();
+    const styles = ColorScheme === "light" ? stylesLight : stylesDark;
 
     const elements = () => {
         if (!isSaved) return (
@@ -28,9 +32,9 @@ export default function Settings() {
                         scrollEnabled={false}
                     />
                 </View>
-                <TouchableOpacity style={styles.button} onPress={() => addApiKey()}>
+                <Text onPress={() => addApiKey()} style={styles.button}>
                     Save API Key
-                </TouchableOpacity>
+                </Text>
                 <ToastProvider
                     showCloseIcon={false}
                     position="bottom"
@@ -41,11 +45,11 @@ export default function Settings() {
         );
         else return (
             <>
-                <Text style={styles.welcomeText}>Your API key has been saved successfully!</Text>
+                <Text style={styles.welcomeText}>Success!</Text>
                 <Text style={styles.descriptionText}>You can now start using the app.</Text>
-                <Link replace={true} href={"/pages"} style={styles.button}>
+                <Text style={styles.button} onPress={() => router.dismissAll()}>
                     Go to App
-                </Link>
+                </Text>
             </>
         );
     }
@@ -84,6 +88,17 @@ export default function Settings() {
     }, [isPasteble]);
 
     const addApiKey = () => {
+        if (value === "") {
+            Toast.show({
+                text1: "API key is empty",
+                text2: "Please enter a valid API key",
+                type: "error",
+                position: "bottom",
+                visibilityTime: 3000,
+                useModal: false
+            })
+            return;
+        }
         Toast.show({
             text1: "Saving API key...",
             text2: "We'll verify your key and save it",
@@ -101,18 +116,10 @@ export default function Settings() {
                 ]);
             } else {
                 setIsSaved(true);
-                Toast.show({
-                    text1: "API key saved",
-                    type: "success",
-                    position: "bottom",
-                    visibilityTime: 4000
-                });
             }
         })
     }
 
-    const ColorScheme = useColorScheme();
-    const styles = ColorScheme === "light" ? stylesLight : stylesDark;
     return (
         <View style={styles.container}>
             {elements()}

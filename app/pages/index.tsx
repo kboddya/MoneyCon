@@ -1,5 +1,5 @@
 import {StyleSheet, Text, TextInput, View, useColorScheme, BackHandler, Alert, Modal} from "react-native";
-import {Link, router, useLocalSearchParams} from "expo-router";
+import {Link, router, Stack, useLocalSearchParams} from "expo-router";
 import {Row, Rows, Table} from "react-native-table-component";
 import {getTime, getValue} from "@/app/services/cacheService";
 import {updateData} from "@/app/services/apiService";
@@ -9,6 +9,7 @@ import {calcData} from "@/app/entities/calcData";
 import ToastProvider, {Toast} from "toastify-react-native"
 import {formatNumber} from "@/app/services/helper";
 import * as Network from "expo-network";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const toUpdate = (text: string): boolean => {
     if (text.includes("-") ||
@@ -159,6 +160,9 @@ export default function Index() {
                 backgroundColor: useColorScheme() === 'dark' ? "black" : "white",
             }}
         >
+            <Stack.Screen options={{
+                headerShown: true
+            }}/>
 
         <View style={colorScheme === "light" ? {
             width: "100%",
