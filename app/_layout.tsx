@@ -100,6 +100,10 @@ export default function RootLayout() {
                 headerBackTitle: "Back",
                 presentation: "modal",
             }}/>
+            <Stack.Screen name={"pages/welcome/index"} options={{
+                headerShown: false,
+                presentation: "modal"
+            }}/>
             <Stack.Screen name={"pages/welcome/Signup"} options={{
                 headerShown: false,
                 presentation: "modal"

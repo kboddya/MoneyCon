@@ -50,6 +50,7 @@ export const stylesLight = StyleSheet.create({
         fontSize: 18,
         borderRadius: 10,
         borderWidth: 1,
+        borderColor: 'transparent',
         backgroundColor: '#EFEFEF',
     },
 });

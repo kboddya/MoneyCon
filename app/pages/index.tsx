@@ -111,7 +111,7 @@ export default function Index() {
             text2: "You can still use the app with the old data.",
             type: "warn",
         });
-        else if (errorStatus.includes("101")) router.replace("/pages/ApiKeySettings")
+        else if (errorStatus.includes("101")) router.push("/pages/welcome")
         else if (errorStatus === "No internet connection") Toast.show({
             text1: "App work's in offline mode",
             type: "warn"
