@@ -1,50 +1,20 @@
 export class calcData {
 
-    constructor(values: {
-        firstVal?: string;
-        secondVal?: string;
-        thirdVal?: string;
-        fourthVal?: string;
-    }, data: string, val: number) {
-        this.val.firstVal = values.firstVal ?? "";
-        this.val.secondVal = values.secondVal ?? "";
-        this.val.thirdVal = values.thirdVal ?? "";
-        this.val.fourthVal = values.fourthVal ?? "";
+    constructor(values: string[], enterData: string, val: number) {
+        this.values = values;
 
-        switch (val) {
-            case 1: {
-                this.firstData = data;
-                break;
-            }
-            case 2: {
-                this.secondData = data;
-                break;
-            }
-            case 3: {
-                this.thirdData = data;
-                break;
-            }
-            case 4: {
-                this.fourthData = data;
-                break;
-            }
+        if (enterData[0] === "," || enterData[0] === ".") {
+            enterData = "0" + enterData;
         }
+        this.data[val] = enterData;
         this.enterVal = val ?? 1;
+        console.log("calcData initialized:", this);
     }
 
-    public val = new values();
+    public data = ["", "", "", ""];
 
-    public firstData = "";
-    public secondData = "";
-    public thirdData = "";
-    public fourthData = "";
+    public values = ["", "", "", ""];
+
 
     public enterVal = 1; // 1 - first, 2 - second, 3 - third, 4 - fourth
-}
-
-class values {
-    public firstVal = "";
-    public secondVal = "";
-    public thirdVal = "";
-    public fourthVal = "";
 }

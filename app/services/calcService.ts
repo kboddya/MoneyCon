@@ -1,6 +1,8 @@
 import {getExchangeRates, getHistorycalExchangeRates, getValue} from "@/app/services/cacheService";
 import {calcData} from "@/app/entities/calcData";
 import {updateData} from "@/app/services/apiService";
+import {is} from "@babel/types";
+import {replace} from "expo-router/build/global-state/routing";
 
 export const calculate = async (data: calcData) => {
     const rates = await getExchangeRates();
@@ -10,54 +12,17 @@ export const calculate = async (data: calcData) => {
         return null;
     }
 
-    const excnageRates = {
-        firstVal: rates?.rates[data.val.firstVal] ?? 1,
-        secondVal: rates?.rates[data.val.secondVal] ?? 1,
-        thirdVal: rates?.rates[data.val.thirdVal] ?? 1,
-        fourthVal: rates?.rates[data.val.fourthVal] ?? 1,
-    }
-    let isComma = false;
-    switch (data.enterVal) {
-        case 1: {
-            isComma = data.firstData.includes(",");
-            const convertedToBase = (Number.parseFloat(data.firstData.replace(" ", "").replace(",", ".")) / excnageRates.firstVal)
-            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(2);
-            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(2);
-            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(2);
-            break;
-        }
-        case 2: {
-            isComma = data.secondData.includes(",");
-            const convertedToBase = (Number.parseFloat(data.secondData.replace(" ", "").replace(",", ".")) / excnageRates.secondVal)
-            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(2);
-            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(2);
-            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(2);
-            break;
-        }
-        case 3: {
-            isComma = data.thirdData.includes(",");
-            const convertedToBase = (Number.parseFloat(data.thirdData.replace(" ", "").replace(",", ".")) / excnageRates.thirdVal)
-            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(2);
-            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(2);
-            data.fourthData = (convertedToBase * excnageRates.fourthVal).toFixed(2);
-            break;
-        }
-        case 4: {
-            isComma = data.fourthData.includes(",");
-            const convertedToBase = (Number.parseFloat(data.fourthData.replace(" ", "").replace(",", ".")) / excnageRates.fourthVal)
-            data.firstData = (convertedToBase * excnageRates.firstVal).toFixed(2);
-            data.secondData = (convertedToBase * excnageRates.secondVal).toFixed(2);
-            data.thirdData = (convertedToBase * excnageRates.thirdVal).toFixed(2);
-            break;
-        }
+    const exchangeRates = [rates?.rates[data.values[0]] ?? 1, rates?.rates[data.values[1]] ?? 1, rates?.rates[data.values[2]] ?? 1, rates?.rates[data.values[3]] ?? 1];
+    const isComma = data.data[data.enterVal].includes(",");
+    const convertToBase = (Number.parseFloat(data.data[data.enterVal].replace(" ", "").replace(",", ".")) / exchangeRates[data.enterVal]);
+
+    for (let i = 0; i < 4; ++i) {
+        if (i === data.enterVal) continue;
+        data.data[i] = isComma ? (convertToBase * exchangeRates[i]).toFixed(2).replace(".", ",")
+            : (convertToBase * exchangeRates[i]).toFixed(2);
     }
 
-    if(isComma){
-        data.firstData = data.firstData.replace(".", ",");
-        data.secondData = data.secondData.replace(".", ",");
-        data.thirdData = data.thirdData.replace(".", ",");
-        data.fourthData = data.fourthData.replace(".", ",");
-    }
+    console.log(convertToBase);
 
     return data;
 }
@@ -69,23 +34,23 @@ export const exchangeRateTable = async () => {
             return getHistorycalExchangeRates().then(historyData => {
                 const calculateValues = (data: any, value: string) => {
                     if (data?.rates == null) {
-                        return (1 / (data[value] ?? 1) * (data[values.firstVal] ?? 1));
+                        return (1 / (data[value] ?? 1) * (data[values[0]] ?? 1));
                     }
-                    return (1 / (data.rates[value] ?? 1) * (data.rates[values.firstVal] ?? 1));
+                    return (1 / (data.rates[value] ?? 1) * (data.rates[values[0]] ?? 1));
                 }
 
                 if (historyData?.rates == null) {
                     return {
                         secondVal: {
-                            currentVal: calculateValues(currentDate, values.secondVal).toFixed(2),
+                            currentVal: calculateValues(currentDate, values[1]).toFixed(2),
                             percentVal: "0%"
                         },
                         thirdVal: {
-                            currentVal: calculateValues(currentDate, values.thirdVal).toFixed(2),
+                            currentVal: calculateValues(currentDate, values[2]).toFixed(2),
                             percentVal: "0%"
                         },
                         fourthVal: {
-                            currentVal: calculateValues(currentDate, values.fourthVal).toFixed(2),
+                            currentVal: calculateValues(currentDate, values[3]).toFixed(2),
                             percentVal: "0%"
                         }
                     };
@@ -93,16 +58,16 @@ export const exchangeRateTable = async () => {
                 const historyRates = JSON.parse(historyData?.rates);
                 return {
                     secondVal: {
-                        currentVal: calculateValues(currentDate, values.secondVal).toFixed(2),
-                        percentVal: ((100 - (100 * (calculateValues(historyRates, values.secondVal) / calculateValues(currentDate, values.secondVal)))).toFixed(2) + "%")
+                        currentVal: calculateValues(currentDate, values[1]).toFixed(2),
+                        percentVal: ((100 - (100 * (calculateValues(historyRates, values[1]) / calculateValues(currentDate, values[1])))).toFixed(2) + "%")
                     },
                     thirdVal: {
-                        currentVal: calculateValues(currentDate, values.thirdVal).toFixed(2),
-                        percentVal: ((100 - (100 * (calculateValues(historyRates, values.thirdVal) / calculateValues(currentDate, values.thirdVal)))).toFixed(2) + "%")
+                        currentVal: calculateValues(currentDate, values[2]).toFixed(2),
+                        percentVal: ((100 - (100 * (calculateValues(historyRates, values[2]) / calculateValues(currentDate, values[2])))).toFixed(2) + "%")
                     },
                     fourthVal: {
-                        currentVal: calculateValues(currentDate, values.fourthVal).toFixed(2),
-                        percentVal: ((100 - (100 * (calculateValues(historyRates, values.fourthVal) / calculateValues(currentDate, values.fourthVal)))).toFixed(2) + "%")
+                        currentVal: calculateValues(currentDate, values[3]).toFixed(2),
+                        percentVal: ((100 - (100 * (calculateValues(historyRates, values[3]) / calculateValues(currentDate, values[3])))).toFixed(2) + "%")
                     }
                 };
             })

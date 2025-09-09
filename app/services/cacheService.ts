@@ -36,19 +36,9 @@ export const getValue = async () => {
         const thirdVal = await AsyncStorage.getItem("thirdVal");
         const fourthVal = await AsyncStorage.getItem("fourthVal");
 
-        return {
-            firstVal: firstVal ?? "?",
-            secondVal: secondVal ?? "?",
-            thirdVal: thirdVal ?? "?",
-            fourthVal: fourthVal ?? "?"
-        };
+        return [firstVal ?? "?", secondVal ?? "?", thirdVal ?? "?", fourthVal ?? "?"];
     } catch (e) {
-        return {
-            firstVal: "C",
-            secondVal: "C",
-            thirdVal: "C",
-            fourthVal: "C"
-        };
+        return ["C", "C", "C", "C"];
     }
 }
 
