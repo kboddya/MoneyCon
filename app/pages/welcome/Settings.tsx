@@ -1,12 +1,11 @@
-import {Alert, useColorScheme, View, Text, TextInput, TouchableOpacity} from "react-native";
-import {use, useEffect, useState} from "react";
+import {Alert, useColorScheme, View, Text, TextInput} from "react-native";
+import {useEffect, useState} from "react";
 import {setApiKey} from "@/app/services/cacheService";
 import ToastProvider, {Toast} from "toastify-react-native";
 import {errorDescription} from "@/app/services/helper";
 import {stylesLight, stylesDark} from "@/assets/styles/welcome/Settings";
 import * as Clipboard from "expo-clipboard";
-import {Link, router} from "expo-router";
-import {replace} from "expo-router/build/global-state/routing";
+import {router} from "expo-router";
 
 export default function Settings() {
     const [value, setValue] = useState("");

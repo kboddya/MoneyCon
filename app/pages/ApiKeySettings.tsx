@@ -1,11 +1,18 @@
 import {Link, router} from 'expo-router';
 import {Text, View, StyleSheet, TextInput, Alert, useColorScheme} from 'react-native';
-import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/app/services/cacheService";
+import {
+    setApiKey,
+    getApiKey,
+    setHistoryDiapason,
+    getHistoryDiapason,
+    getExchangeRatesProvider, setExchangeRatesProvider
+} from "@/app/services/cacheService";
 import React, {useState} from "react";
 import {errorDescription} from "@/app/services/helper";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import ToastProvider, {Toast} from "toastify-react-native";
 import * as Network from "expo-network";
+import {stylesLight, stylesDark} from "@/assets/styles/ApiKeySettings";
 
 export default function ApiKeySettings() {
     const [networkStatus, setNetworkStatus] = useState({
@@ -33,9 +40,89 @@ export default function ApiKeySettings() {
 
     const [value, setValue] = useState("");
 
+    const [provider, setProvider] = useState(-1);
+
+    getExchangeRatesProvider().then(res => setProvider(res));
+
     const colorScheme = useColorScheme();
 
     const styles = colorScheme === 'light' ? stylesLight : stylesDark;
+
+    const renderApiKeyInput = () => {
+        return (
+            <>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        value={value}
+                        onChangeText={setValue}
+                        style={colorScheme === "light" ? {
+                            paddingLeft: 10,
+                            fontSize: 18,
+                            justifyContent: "center",
+                            color: "#4C4C4C"
+                        } : {paddingLeft: 10, fontSize: 18, justifyContent: "center", color: "#ABABAB"}}
+                        placeholder={apiKey === "" ? "Enter your API key" : apiKey}
+                        keyboardType="default"
+                        autoCorrect={false}
+                        scrollEnabled={false}
+                        editable={networkStatus.isChanged && !(!networkStatus.isConnected || !networkStatus.isInternetReachable)}
+                        onTouchEnd={() => {
+                            if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
+                                Toast.show({
+                                    text1: "No internet connection",
+                                    type: "error",
+                                    position: "bottom"
+                                });
+                            }
+                        }}
+                        onSubmitEditing={e => {
+                            Toast.show({
+                                text1: "Saving API key...",
+                                text2: "We'll verify your key and save it",
+                                type: "info",
+                                visibilityTime: 4000,
+                                useModal: true
+                            })
+                            setApiKey(e.nativeEvent.text)
+                                .then(result => {
+                                    Toast.hide();
+                                    if ((typeof result === "object" && !result.success) || result === false) {
+                                        Alert.alert("Error", errorDescription(!result ? "" : result.error), [
+                                            {
+                                                text: "Try again",
+                                                onPress: () => setValue("")
+                                            }
+                                        ]);
+                                    } else {
+                                        Alert.alert("Success", "API key was saved success",
+                                            [
+                                                {
+                                                    text: "Close",
+                                                    onPress: () => setValue("")
+                                                },
+                                                {
+                                                    text: "Go Home",
+                                                    onPress: () => router.replace("/")
+                                                }
+                                            ])
+                                    }
+                                })
+                        }
+                        }
+                    />
+                </View>
+
+                <Text style={colorScheme === "light" ? {marginTop: "2%", color: "#4C4C4C"} : {
+                    marginTop: "2%",
+                    color: "#ABABAB"
+                }}>
+                    You can get your API key from <Link href={"https://exchangeratesapi.io/"}
+                                                        style={colorScheme === "light" ? {color: "blue"} : {color: "#6599ff"}}>exchangerates</Link>
+                </Text>
+            </>
+        )
+    }
+
     return (
         <View
             style={{
@@ -55,17 +142,21 @@ export default function ApiKeySettings() {
                 height: 0.2,
                 opacity: 0.5
             }}/>
-            <Text style={colorScheme === "light" ? {
-                marginTop: 15,
-                fontSize: 19,
-                fontWeight: "semibold",
-                color: "#4C4C4C"
-            } : {
-                marginTop: 15,
-                fontSize: 19,
-                fontWeight: "semibold",
-                color: "#ABABAB"
-            }}>Exchange history
+            <Text style={styles.headerText}>Exchange rates provider</Text>
+            <SegmentedControl
+                values={["fawazahmed0", "exchangeratesapi"]}
+                selectedIndex={provider}
+                style={styles.historyContainer}
+                fontStyle={styles.historyValue}
+                backgroundColor={colorScheme === "light" ? "#ffffff" : "#000000"}
+                tintColor={colorScheme === "light" ? "#EFEFEF" : "#272525"}
+                activeFontStyle={styles.historyValue}
+                sliderStyle={{borderRadius: 10}}
+                tabIndex={-1}
+                onChange={event => setExchangeRatesProvider(event.nativeEvent.selectedSegmentIndex)}
+            />
+
+            <Text style={styles.headerText}>Exchange history
                 interval</Text>
 
             <SegmentedControl
@@ -144,74 +235,8 @@ export default function ApiKeySettings() {
                 }}
             />
 
-            <View style={styles.inputContainer}>
-                <TextInput
-                    value={value}
-                    onChangeText={setValue}
-                    style={colorScheme === "light" ? {
-                        paddingLeft: 10,
-                        fontSize: 18,
-                        justifyContent: "center",
-                        color: "#4C4C4C"
-                    } : {paddingLeft: 10, fontSize: 18, justifyContent: "center", color: "#ABABAB"}}
-                    placeholder={apiKey === "" ? "Enter your API key" : apiKey}
-                    keyboardType="default"
-                    autoCorrect={false}
-                    scrollEnabled={false}
-                    editable={networkStatus.isChanged && !(!networkStatus.isConnected || !networkStatus.isInternetReachable)}
-                    onTouchEnd={() => {
-                        if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
-                            Toast.show({
-                                text1: "No internet connection",
-                                type: "error",
-                                position: "bottom"
-                            });
-                        }
-                    }}
-                    onSubmitEditing={e => {
-                        Toast.show({
-                            text1: "Saving API key...",
-                            text2: "We'll verify your key and save it",
-                            type: "info",
-                            visibilityTime: 4000,
-                            useModal: true
-                        })
-                        setApiKey(e.nativeEvent.text)
-                            .then(result => {
-                                Toast.hide();
-                                if ((typeof result === "object" && !result.success) || result === false) {
-                                    Alert.alert("Error", errorDescription(!result ? "" : result.error), [
-                                        {
-                                            text: "Try again",
-                                            onPress: () => setValue("")
-                                        }
-                                    ]);
-                                } else {
-                                    Alert.alert("Success", "API key was saved success",
-                                        [
-                                            {
-                                                text: "Close",
-                                                onPress: () => setValue("")
-                                            },
-                                            {
-                                                text: "Go Home",
-                                                onPress: () => router.replace("/")
-                                            }
-                                        ])
-                                }
-                            })
-                    }
-                    }
-                />
-            </View>
+            {provider === 1 ? renderApiKeyInput(): null}
 
-            <Text style={colorScheme === "light" ? {marginTop: "2%", color: "#4C4C4C"} : {
-                marginTop: "2%",
-                color: "#ABABAB"
-            }}>
-                You can get your API key from <Link href={"https://exchangeratesapi.io/"}
-                                                    style={colorScheme === "light" ? {color: "blue"} : {color: "#6599ff"}}>exchangerates</Link>
-            </Text>
             <ToastProvider
                 showCloseIcon={false}
                 position="bottom"
@@ -220,71 +245,3 @@ export default function ApiKeySettings() {
         </View>
     );
 }
-
-const stylesLight = StyleSheet.create({
-    inputContainer: {
-        marginTop: 17,
-        height: "5.9%",
-        width: "80%",
-        backgroundColor: "#EFEFEF",
-        borderRadius: 10,
-        justifyContent: "center"
-    },
-
-    historyContainer: {
-        width: "80%",
-        height: "5.8%",
-        backgroundColor: "#ffffff",
-        borderWidth: 1,
-        borderColor: "#EFEFEF",
-        borderRadius: 10,
-        padding: 0,
-        marginTop: 5,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyValue: {
-        fontSize: 18,
-        color: "#4C4C4C",
-    },
-
-    text: {
-        color: "#4C4C4C",
-    }
-});
-
-const stylesDark = StyleSheet.create({
-    inputContainer: {
-        marginTop: 17,
-        height: "5.9%",
-        width: "80%",
-        backgroundColor: "#272525",
-        borderRadius: 10,
-        justifyContent: "center"
-    },
-
-    historyContainer: {
-        width: "80%",
-        height: "5.8%",
-        backgroundColor: "#000000",
-        borderWidth: 1,
-        borderColor: "#272525",
-        borderRadius: 10,
-        padding: 0,
-        marginTop: 5,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    historyValue: {
-        fontSize: 18,
-        color: "#ABABAB",
-    },
-
-    text: {
-        color: "#ABABAB",
-    }
-});

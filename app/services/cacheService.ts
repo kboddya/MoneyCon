@@ -149,3 +149,20 @@ export const getHistorycalExchangeRates = async () => {
         return null;
     }
 }
+
+export const setExchangeRatesProvider = async (provider: number) => {
+    try {
+        await AsyncStorage.setItem("exchangeRatesProvider", provider.toString());
+    } catch (e) {
+        console.log("Cache Service: Error saving exchange rates provider:", e);
+    }
+}
+
+export const getExchangeRatesProvider = async () => {
+    try {
+        const provider = await AsyncStorage.getItem("exchangeRatesProvider");
+        return provider ? Number.parseInt(provider) : -1; // Default provider is 1
+    } catch (e) {
+        return -1; // Default provider is 1
+    }
+}

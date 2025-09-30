@@ -1,6 +1,6 @@
 import {useColorScheme, View, Text, Button} from "react-native";
 import {stylesLight, stylesDark} from "@/assets/styles/welcome";
-import {Link, router, Stack} from "expo-router";
+import {Link, Stack} from "expo-router";
 
 export default function Index() {
     const colorScheme = useColorScheme();

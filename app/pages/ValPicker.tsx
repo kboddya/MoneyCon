@@ -1,8 +1,9 @@
 import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
 import {Link, useLocalSearchParams} from "expo-router";
 import {changeValue} from "@/app/services/cacheService";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback} from "react";
 import ToastProvider, {Toast} from "toastify-react-native"
+import {stylesDark, stylesLight} from "@/assets/styles/ValPicker";
 
 const currencies = require("../../assets/currencies.json");
 
@@ -77,49 +78,3 @@ export default function ValPicker() {
         </View>
     );
 }
-
-const stylesLight = StyleSheet.create({
-    item: {
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#DDDDDD',
-        flexDirection: 'row',
-        width: "100%",
-    },
-    fullNamePart: {
-        marginLeft: 10,
-        width: "82%",
-    },
-    codePart: {
-        width: "18%",
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    itemText: {
-        fontSize: 18,
-        color: "#4C4C4C"
-    },
-});
-
-const stylesDark = StyleSheet.create({
-    item: {
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ABABAB',
-        flexDirection: 'row',
-        width: "100%",
-    },
-    fullNamePart: {
-        marginLeft: 10,
-        width: "82%",
-    },
-    codePart: {
-        width: "18%",
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    itemText: {
-        fontSize: 18,
-        color: "#ABABAB"
-    },
-});

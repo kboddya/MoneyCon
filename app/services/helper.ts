@@ -42,18 +42,3 @@ export const errorDescription = (error: string) => {
         return "An unknown error occurred. Please try again.";
     }
 }
-
-
-export const formatNumber = async (number: {
-    firstData: string,
-    secondData: string,
-    thirdData: string,
-    fourthData: string
-}) => {
-    return {
-        firstData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number.firstData)).toString().replace(",", ".")),
-        secondData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number?.secondData)).toString().replace(",", ".")),
-        thirdData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number?.thirdData)).toString().replace(",", ".")),
-        fourthData: (new Intl.NumberFormat("fr-FR").format(Number.parseFloat(number?.fourthData)).toString().replace(",", "."))
-    };
-}
