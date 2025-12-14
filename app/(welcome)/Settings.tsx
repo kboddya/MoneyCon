@@ -1,17 +1,19 @@
-import {Alert, useColorScheme, View, Text, TextInput, TouchableOpacity} from "react-native";
-import {use, useEffect, useState} from "react";
-import {setApiKey} from "@/app/services/cacheService";
-import ToastProvider, {Toast} from "toastify-react-native";
-import {errorDescription} from "@/app/services/helper";
-import {stylesLight, stylesDark} from "@/assets/styles/welcome/Settings";
+import { Alert, useColorScheme, View, Text, TextInput, TouchableOpacity } from "react-native";
+import { use, useContext, useEffect, useState } from "react";
+import ToastProvider, { Toast } from "toastify-react-native";
+import { errorDescription } from "@/services/helper";
+import { stylesLight, stylesDark } from "@/styles/welcome/Settings";
 import * as Clipboard from "expo-clipboard";
-import {Link, router} from "expo-router";
-import {replace} from "expo-router/build/global-state/routing";
+import { router } from "expo-router";
+import { AuthContext } from "@/context/AuthContext";
+
 
 export default function Settings() {
     const [value, setValue] = useState("");
     const [isSaved, setIsSaved] = useState(false);
     const [isPasteble, setIsPasteble] = useState(false);
+
+    const { setApiKeyAsync } = useContext(AuthContext);
 
     const ColorScheme = useColorScheme();
     const styles = ColorScheme === "light" ? stylesLight : stylesDark;
@@ -88,36 +90,11 @@ export default function Settings() {
     }, [isPasteble]);
 
     const addApiKey = () => {
-        if (value === "") {
-            Toast.show({
-                text1: "API key is empty",
-                text2: "Please enter a valid API key",
-                type: "error",
-                position: "bottom",
-                visibilityTime: 3000,
-                useModal: false
-            })
-            return;
-        }
-        Toast.show({
-            text1: "Saving API key...",
-            text2: "We'll verify your key and save it",
-            type: "info",
-            useModal: true
-        });
-        setApiKey(value).then(result => {
-            Toast.hide();
-            if ((typeof result === "object" && !result.success) || result === false) {
-                Alert.alert("Error", errorDescription(!result ? "" : result.error), [
-                    {
-                        text: "Try again",
-                        onPress: () => setValue("")
-                    }
-                ]);
-            } else {
+        setApiKeyAsync(value).then(res => {
+            if (res.ok) {
                 setIsSaved(true);
             }
-        })
+        });
     }
 
     return (

@@ -1,11 +1,15 @@
-import {Link, router} from 'expo-router';
-import {Text, View, StyleSheet, TextInput, Alert, useColorScheme} from 'react-native';
-import {setApiKey, getApiKey, setHistoryDiapason, getHistoryDiapason} from "@/app/services/cacheService";
-import React, {useState} from "react";
-import {errorDescription} from "@/app/services/helper";
+import { Link, router, Stack } from 'expo-router';
+import { Text, View, StyleSheet, TextInput, Alert, useColorScheme } from 'react-native';
+import { getApiKey, setHistoryDiapason, getHistoryDiapason } from "@/services/cacheService";
+import React, { useContext, useState } from "react";
+import { errorDescription } from "@/services/helper";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-import ToastProvider, {Toast} from "toastify-react-native";
+import ToastProvider, { Toast } from "toastify-react-native";
 import * as Network from "expo-network";
+import { UpdateApiKey } from '@/services/apiService';
+import { Image } from "expo-image";
+import { ExchangeRateContext } from '@/context/ExchangeRateContext';
+
 
 export default function ApiKeySettings() {
     const [networkStatus, setNetworkStatus] = useState({
@@ -23,7 +27,8 @@ export default function ApiKeySettings() {
             isChanged: true
         });
     });
-
+    const theme = useColorScheme();
+    const { updateExchangeRate } = useContext(ExchangeRateContext);
 
     const [apiKey, setApiKeyState] = useState("");
     getApiKey().then(setApiKeyState)
@@ -44,6 +49,13 @@ export default function ApiKeySettings() {
                 backgroundColor: colorScheme === 'light' ? "white" : 'black',
             }}>
 
+            <Stack.Screen options={{
+                headerRight: () =>
+                    <Image style={{ width: 25, height: 25, padding: 11, alignSelf: "center", alignContent: "center" }}
+                        source={theme === 'light' ? require("@/assets/images/reload-light.png") : require("@/assets/images/reload-dark.png")}
+                        onTouchEnd={updateExchangeRate} />
+            }} />
+
             <View style={colorScheme === "light" ? {
                 width: "100%",
                 height: 0.2,
@@ -54,7 +66,7 @@ export default function ApiKeySettings() {
                 backgroundColor: "#ABABAB",
                 height: 0.2,
                 opacity: 0.5
-            }}/>
+            }} />
             <Text style={colorScheme === "light" ? {
                 marginTop: 15,
                 fontSize: 19,
@@ -76,7 +88,7 @@ export default function ApiKeySettings() {
                 backgroundColor={colorScheme === "light" ? "#ffffff" : "#000000"}
                 tintColor={colorScheme === "light" ? "#EFEFEF" : "#272525"}
                 activeFontStyle={styles.historyValue}
-                sliderStyle={{borderRadius: 10}}
+                sliderStyle={{ borderRadius: 10 }}
                 tabIndex={-1}
                 onChange={event => {
                     switch (event.nativeEvent.selectedSegmentIndex) {
@@ -153,7 +165,7 @@ export default function ApiKeySettings() {
                         fontSize: 18,
                         justifyContent: "center",
                         color: "#4C4C4C"
-                    } : {paddingLeft: 10, fontSize: 18, justifyContent: "center", color: "#ABABAB"}}
+                    } : { paddingLeft: 10, fontSize: 18, justifyContent: "center", color: "#ABABAB" }}
                     placeholder={apiKey === "" ? "Enter your API key" : apiKey}
                     keyboardType="default"
                     autoCorrect={false}
@@ -176,11 +188,11 @@ export default function ApiKeySettings() {
                             visibilityTime: 4000,
                             useModal: true
                         })
-                        setApiKey(e.nativeEvent.text)
+                        UpdateApiKey(e.nativeEvent.text)
                             .then(result => {
                                 Toast.hide();
-                                if ((typeof result === "object" && !result.success) || result === false) {
-                                    Alert.alert("Error", errorDescription(!result ? "" : result.error), [
+                                if (!result.ok) {
+                                    Alert.alert("Error", errorDescription(!result.error ? "" : result.error), [
                                         {
                                             text: "Try again",
                                             onPress: () => setValue("")
@@ -205,12 +217,12 @@ export default function ApiKeySettings() {
                 />
             </View>
 
-            <Text style={colorScheme === "light" ? {marginTop: "2%", color: "#4C4C4C"} : {
+            <Text style={colorScheme === "light" ? { marginTop: "2%", color: "#4C4C4C" } : {
                 marginTop: "2%",
                 color: "#ABABAB"
             }}>
                 You can get your API key from <Link href={"https://exchangeratesapi.io/"}
-                                                    style={colorScheme === "light" ? {color: "blue"} : {color: "#6599ff"}}>exchangerates</Link>
+                    style={colorScheme === "light" ? { color: "blue" } : { color: "#6599ff" }}>exchangerates</Link>
             </Text>
             <ToastProvider
                 showCloseIcon={false}

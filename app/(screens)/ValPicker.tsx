@@ -1,20 +1,20 @@
-import {FlatList, View, Text, StyleSheet, useColorScheme} from 'react-native';
-import {Link, useLocalSearchParams} from "expo-router";
-import {changeValue} from "@/app/services/cacheService";
-import React, {useCallback, useEffect, useState} from "react";
-import ToastProvider, {Toast} from "toastify-react-native"
+import { FlatList, View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { Link, useLocalSearchParams } from "expo-router";
+import { changeValue } from "@/services/cacheService";
+import React, { useCallback, useEffect, useState } from "react";
+import ToastProvider, { Toast } from "toastify-react-native"
 
 const currencies = require("../../assets/currencies.json");
 
 export default function ValPicker() {
 
-    const {ID} = useLocalSearchParams();
+    const { ID } = useLocalSearchParams();
 
     const colorScheme = useColorScheme();
 
     const styles = colorScheme === "light" ? stylesLight : stylesDark
     // @ts-ignore
-    const renderItems = useCallback(({item}) => (
+    const renderItems = useCallback(({ item }) => (
         <Link onPress={() => changeValue(ID.toString(), item.code).then(res => {
             if (res === null) {
                 Toast.show({
@@ -64,12 +64,12 @@ export default function ValPicker() {
                 data={currencies}
                 keyExtractor={(item) => item.code}
                 ListFooterComponent={() => (
-                    <View style={{alignItems: "center"}}>
+                    <View style={{ alignItems: "center" }}>
                         <Text style={styles.itemText}>Select a value to change it</Text>
                     </View>
                 )}
                 renderItem={renderItems}
-                style={{marginBottom: 12, width: "95%"}}
+                style={{ marginBottom: 12, width: "95%" }}
             />
             <ToastProvider
                 position="bottom"

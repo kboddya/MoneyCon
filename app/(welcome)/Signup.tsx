@@ -1,14 +1,14 @@
-import {Text, useColorScheme, View} from "react-native";
-import {useState} from "react";
-import {stylesDark, stylesLight} from "@/assets/styles/welcome/Signup";
-import {Link} from "expo-router";
+import { Text, useColorScheme, View } from "react-native";
+import { useState } from "react";
+import { stylesDark, stylesLight } from "@/styles/welcome/Signup";
+import { Link } from "expo-router";
 
 export default function Signup() {
     const [isSigningUp, setIsSigningUp] = useState(false);
     const ColorScheme = useColorScheme();
     const buttons = () => {
         if (isSigningUp) return (
-            <Link href={"/pages/welcome/Settings"} style={styles.button} onPress={() => setIsSigningUp(false)}>
+            <Link href={"/(welcome)/Settings"} style={styles.button} onPress={() => setIsSigningUp(false)}>
                 Continue
             </Link>
         );
@@ -20,7 +20,7 @@ export default function Signup() {
                     Log In
                 </Link>
                 <Link href={"https://manage.exchangeratesapi.io/signup/free"} style={styles.button}
-                      onPress={() => setIsSigningUp(true)}>
+                    onPress={() => setIsSigningUp(true)}>
                     Sign Up
                 </Link>
             </View>

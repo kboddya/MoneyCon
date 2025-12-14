@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {updateData} from "@/app/services/apiService";
 
 export const changeValue = async (i: string, code: string) => {
     try {
@@ -68,7 +67,7 @@ export const getExchangeRates = async () => {
 export const getTime = async () => {
     try {
         const time = await AsyncStorage.getItem("time");
-        return time ? time : "0"
+        return time ? time : "0";
     } catch (e) {
         console.log("Cache Service: Error retrieving time:", e);
         return "0";
@@ -76,22 +75,12 @@ export const getTime = async () => {
 }
 
 export const setApiKey = async (key: string) => {
-    return await updateData(true, key)
-        .then(async result => {
-            if (result.success) {
-                try {
-                    await AsyncStorage.setItem("apiKey", key);
-                    console.log("Cache Service: API key saved successfully:", key);
-                    return true;
-                } catch (e) {
-                    console.log("Cache Service: Error saving API key:", e);
-                    return false;
-                }
-            } else {
-                await AsyncStorage.removeItem("apiKey");
-                return result;
-            }
-        });
+    try {
+        await AsyncStorage.setItem("apiKey", key);
+        console.log("Cache Service: API key saved successfully");
+    } catch (e) {
+        console.error("Cache Service: Error saving API key:", e);
+    }
 }
 
 export const getApiKey = async () => {
@@ -121,7 +110,6 @@ export const setHistoryDiapason = async (value: number) => {
         await AsyncStorage.setItem("history", value.toString());
         await AsyncStorage.setItem("timeHistory", new Date(Date.now()).toString())
         console.log("Cache Service: History diapason updated successfully:", value);
-        await updateData();
         return true;
     } catch (e) {
         console.log("Cache Service: Error updating history diapason:", e);
@@ -147,5 +135,24 @@ export const getHistorycalExchangeRates = async () => {
     } catch (e) {
         console.log("Cache Service: Error retrieving history exchange rates:", e);
         return null;
+    }
+}
+
+export const setLastRequestCode = async (code: string) => {
+    try {
+        await AsyncStorage.setItem("lastRequestCode", code);
+        console.log("Cache Service: Last request code saved successfully:", code);
+    } catch (e) {
+        console.error("Cache Service: Error saving last request code:", e);
+    }
+}
+
+export const getLastRequestCode = async () => {
+    try {
+        const code = await AsyncStorage.getItem("lastRequestCode");
+        return code ? parseInt(code) : 0;
+    } catch (e) {
+        console.error("Cache Service: Error retrieving last request code:", e);
+        return 0;
     }
 }

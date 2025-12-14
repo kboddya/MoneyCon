@@ -1,8 +1,8 @@
-import {getExchangeRates, getHistorycalExchangeRates, getValue} from "@/app/services/cacheService";
-import {calcData} from "@/app/entities/calcData";
-import {updateData} from "@/app/services/apiService";
-import {is} from "@babel/types";
-import {replace} from "expo-router/build/global-state/routing";
+import { getExchangeRates, getHistorycalExchangeRates, getValue } from "@/services/cacheService";
+import { calcData } from "@/entities/calcData";
+import { updateData } from "@/services/apiService";
+import { is } from "@babel/types";
+import { replace } from "expo-router/build/global-state/routing";
 
 export const calculate = async (data: calcData) => {
     const rates = await getExchangeRates();

@@ -1,9 +1,15 @@
 import {
     getApiKey,
-    getExchangeRates, getHistorycalExchangeRates, getHistoryDiapason,
+    getExchangeRates,
+    getHistorycalExchangeRates,
+    getHistoryDiapason,
     getTime,
-    updateExchangeRates, updateHistorycalExchangeRates
-} from "@/app/services/cacheService";
+    updateExchangeRates,
+    updateHistorycalExchangeRates,
+    setLastRequestCode,
+    setApiKey
+} from "@/services/cacheService";
+import { UpdateDataResult } from "@/entities/UpdateDataResult";
 
 
 let exchangeRatesInWork = false;
@@ -15,9 +21,8 @@ const getExchangeRatesFromApi = async (apiKey: string, force = false) => {
             exchangeRatesInWork = true;
             try {
                 const response = await fetch("https://api.exchangeratesapi.io/v1/latest?access_key=" + apiKey);
-
                 if (!response.ok) {
-                    throw new Error(`HTTP error status: ${response.status}`);
+                    throw new Error(response.status.toString());
                 }
 
                 const data = await response.json();
@@ -33,6 +38,7 @@ const getExchangeRatesFromApi = async (apiKey: string, force = false) => {
                 }
             } catch (error) {
                 exchangeRatesInWork = false;
+                setLastRequestCode(error as string)
                 return error; // Error code for fetching exchange rates
             }
         }
@@ -55,7 +61,7 @@ export const getHistoryExchangeRatesFromApi = async (apiKey: string, force = fal
             const response = await fetch("https://api.exchangeratesapi.io/v1/" + (date.getFullYear().toString() + "-" + ((date.getMonth() + 1).toString().length === 1 ? "0" + (date.getMonth() + 1).toString() : (date.getMonth() + 1).toString()) + "-" + (date.getDate().toString().length === 1 ? "0" + date.getDate().toString() : date.getDate().toString())) + "?access_key=" + apiKey);
 
             if (!response.ok) {
-                throw new Error("HTTP error status: " + response.status);
+                throw new Error(response.status.toString());
             }
 
             const data = await response.json();
@@ -76,24 +82,29 @@ export const getHistoryExchangeRatesFromApi = async (apiKey: string, force = fal
     } catch (error) {
         historyInWork = false;
         console.log("API Service: Error fetching history exchange rates:", error);
+        setLastRequestCode(error as string)
         return error; // Error code for fetching history exchange rates
     }
 }
 
+/**
+*Updating both exchange rates and history exchange rates from API
+*If force is true, data will be fetched regardless of last update time
+*If customApiKey is provided, it will be used instead of the stored API key
+*@returns  {Promise<{latestSuccess: boolean, latestError: string, historySuccess: boolean, historyError: string}>}
+**/
 export const updateData = async (force = false, customApiKey = "") => {
+
     const apiKey = customApiKey != "" ? customApiKey : await getApiKey();
     const exchangeRates = await getExchangeRates();
     const historyExchangeRates = (await getHistorycalExchangeRates())?.rates;
 
-    let result = {
-        success: true,
-        error: ""
-    }
+    let result: UpdateDataResult = { latestSuccess: true, historySuccess: true } as UpdateDataResult;
 
     if (!apiKey) {
-        result.error += "101";
-        if (exchangeRates?.rates !== null) result.error += " 1000";
-        result.success = false;
+        result.latestError = "101";
+        if (exchangeRates?.rates !== null) result.latestError += " 1000";
+        result.latestSuccess = false;
         return result;
     }
 
@@ -107,8 +118,8 @@ export const updateData = async (force = false, customApiKey = "") => {
             })
         } catch (Error) {
             console.error("API Service: Error fetching exchange rates:", Error);
-            result.error += Error;
-            result.success = false;
+            result.latestError += Error as string;
+            result.latestSuccess = false;
         }
     }
 
@@ -123,11 +134,22 @@ export const updateData = async (force = false, customApiKey = "") => {
 
         } catch (Error) {
             console.error("API Service: Error fetching history exchange rates:", Error);
-            if (result.error !== "") result.error += "\n";
-            result.error += Error;
-            result.success = false;
+            if (result.historyError !== "") result.historyError += "\n";
+            result.historyError += Error as string;
+            result.historySuccess = false;
         }
     }
 
     return result;
+}
+
+export const UpdateApiKey = async (newApiKey: string): Promise<{ ok: boolean, error?: string }> => {
+    const result = await updateData(true, newApiKey);
+    console.log("API Service: UpdateData result:", result);
+    const ok = result.latestSuccess || result.historySuccess;
+    if (!ok) {
+        return { ok: false, error: result.latestError || result.historyError };
+    }
+    await setApiKey(newApiKey);
+    return { ok: true };
 }
