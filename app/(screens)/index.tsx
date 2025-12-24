@@ -1,13 +1,12 @@
-import { StyleSheet, Text, TextInput, View, useColorScheme, BackHandler, Alert, Modal } from "react-native";
-import { Link, router, Stack, useLocalSearchParams } from "expo-router";
+import { StyleSheet, Text, TextInput, View, useColorScheme, useWindowDimensions } from "react-native";
+import { Link, Stack } from "expo-router";
 import { Row, Rows, Table } from "react-native-table-component";
-import { getTime, getValue } from "@/services/cacheService";
-import { updateData } from "@/services/apiService";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { calculate, exchangeRateTable } from "@/services/calcService";
-import { calcData } from "@/entities/calcData";
+import React, { useContext, useEffect, useState } from "react";
+import { CalcService, CalcData } from "@/services/CalcService";
 import ToastProvider, { Toast } from "toastify-react-native"
 import { ExchangeRateContext } from "@/context/ExchangeRateContext";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
 
 const toUpdate = (text: string): boolean => {
     if (text.includes("-") ||
@@ -16,25 +15,9 @@ const toUpdate = (text: string): boolean => {
 }
 
 export default function Index() {
+    const { exchangeRateUpdateTimestamp, values, table, exchangeRates } = useContext(ExchangeRateContext);
 
-    const { exchangeRateUpdateTimestamp } = useContext(ExchangeRateContext);
-
-    const [values, setValues] = useState(["", "", "", ""]);
-
-    const [table, setTable] = useState({
-        secondVal: {
-            currentVal: "",
-            percentVal: ""
-        },
-        thirdVal: {
-            currentVal: "",
-            percentVal: ""
-        },
-        fourthVal: {
-            currentVal: "",
-            percentVal: ""
-        },
-    });
+    const { fontScale } = useWindowDimensions();
 
     const [data, setData] = useState<string[]>(["", "", "", ""]);
 
@@ -42,7 +25,12 @@ export default function Index() {
 
     useEffect(() => {
         if (lastFocusedBox !== -1) {
-            calculate(new calcData(values, data[lastFocusedBox - 1], lastFocusedBox)).then(result => {
+            CalcService.calculate({
+                data,
+                values,
+                exchangeRates,
+                enterVal: lastFocusedBox
+            }).then(result => {
                 if (result == null) Toast.show({
                     text1: "Exchange rates are not available. Please try again later.",
                     type: "error"
@@ -54,26 +42,6 @@ export default function Index() {
         }
     }, [values[0], values[1], values[2], values[3]]);
 
-    getValue().then(setValues);
-
-    exchangeRateTable().then(data => {
-        setTable(data ?? {
-            secondVal: {
-                currentVal: "",
-                percentVal: ""
-            },
-            thirdVal: {
-                currentVal: "",
-                percentVal: ""
-            },
-            fourthVal: {
-                currentVal: "",
-                percentVal: ""
-            },
-        });
-    }
-    )
-
     const colorScheme = useColorScheme();
     const styles = StyleSheet.create(colorScheme === 'dark' ? stylesDark : stylesLight);
 
@@ -82,12 +50,13 @@ export default function Index() {
             <View style={styles.textBoxAndValPicker}>
 
                 <View style={styles.valuePicker}>
-                    <Link href={`/(screens)/ValPicker?ID=${enterVal + 1}`}>
+                    <Link href={`/(screens)/ValPicker?ID=${enterVal}`}>
                         <View
                             style={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
-                            <Text style={styles.valueButtonText}>
-                                {values[enterVal] ?? "?"}
-                            </Text>
+                            {!values[enterVal] || values[enterVal] === "C" ? <MaterialCommunityIcons name="currency-usd-off" size={24} color={colorScheme === "light" ? "black" : "white"} /> :
+                                <Text style={styles.valueButtonText}>
+                                    {values[enterVal]}
+                                </Text>}
                         </View>
 
                     </Link>
@@ -95,8 +64,12 @@ export default function Index() {
 
                 <View style={styles.border} />
 
-
-                <TextInput
+                {!values[enterVal] || values[enterVal] === "C" ? <View style={styles.textInput}>
+                    <Text style={styles.text}>
+                        <MaterialCommunityIcons name="arrow-left" size={14 * fontScale} color={colorScheme === "light" ? "black" : "white"} />
+                        Change currency
+                    </Text>
+                </View> : <TextInput
                     style={styles.textInput}
                     keyboardType="numeric"
                     placeholder={"Enter amount"}
@@ -104,8 +77,17 @@ export default function Index() {
                     onChangeText={text => {
                         setLastFocusedBox(enterVal);
                         if (!toUpdate(text)) return;
-                        setData(prevState => prevState.map((val, i) => val = i === enterVal ? text : val));
-                        calculate(new calcData(values, text, enterVal)).then(result => {
+                        const updatedData = data.map((val, i) => {
+                            if (i === enterVal) val = text;
+                            return val;
+                        })
+                        setData(updatedData);
+                        CalcService.calculate({
+                            data: updatedData,
+                            values,
+                            exchangeRates,
+                            enterVal: enterVal
+                        }).then(result => {
                             if (result == null) Toast.show({
                                 text1: "Exchange rates are not available. Please try again later.",
                                 type: "error"
@@ -123,7 +105,8 @@ export default function Index() {
                         setData(updatedData)
                     }}
                     returnKeyType={"done"}
-                />
+                />}
+
             </View>
         )
     }
@@ -153,16 +136,16 @@ export default function Index() {
                 opacity: 0.5
             }} />
 
-            <Text
+            {exchangeRateUpdateTimestamp && <Text
                 style={styles.updated}>Updated: {exchangeRateUpdateTimestamp ? ((Date.now() - Date.parse(exchangeRateUpdateTimestamp)) / (1000 * 60 * 60)).toFixed(0) : "?"} hours
-                ago</Text>
+                ago</Text>}
 
             {ValAndDataBox(0)}
             {ValAndDataBox(1)}
             {ValAndDataBox(2)}
             {ValAndDataBox(3)}
 
-            <View style={styles.excangeRateTabdle}>
+            {table && <View style={styles.excangeRateTabdle}>
 
                 <View style={styles.excangeRateTableHeader}>
                     <Text style={styles.tableHeader}>Exchange Rates</Text>
@@ -197,7 +180,7 @@ export default function Index() {
                         style={{ paddingTop: "4.5%", marginBottom: "8.3%" }}
                     />
                 </Table>
-            </View>
+            </View>}
             <ToastProvider
                 position="bottom"
                 showCloseIcon={false}

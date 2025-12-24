@@ -46,9 +46,9 @@ const getExchangeRatesFromApi = async (apiKey: string, force = false) => {
 }
 
 let historyInWork = false;
-export const getHistoryExchangeRatesFromApi = async (apiKey: string, force = false) => {
+const getHistoryExchangeRatesFromApi = async (apiKey: string | undefined, force = false) => {
+    if (!apiKey) return
     try {
-        await new Promise(resolve => setTimeout(resolve, 3000));
         const exchange = await getHistorycalExchangeRates().then(data => data ? data : null);
         const historyDiapason = await getHistoryDiapason().then(data => {
             if (typeof data === "number") return data;
@@ -93,7 +93,7 @@ export const getHistoryExchangeRatesFromApi = async (apiKey: string, force = fal
 *If customApiKey is provided, it will be used instead of the stored API key
 *@returns  {Promise<{latestSuccess: boolean, latestError: string, historySuccess: boolean, historyError: string}>}
 **/
-export const updateData = async (force = false, customApiKey = "") => {
+const updateData = async (force = false, customApiKey = "") => {
 
     const apiKey = customApiKey != "" ? customApiKey : await getApiKey();
     const exchangeRates = await getExchangeRates();
@@ -123,6 +123,8 @@ export const updateData = async (force = false, customApiKey = "") => {
         }
     }
 
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     if (!historyInWork) {
         try {
             await getHistoryExchangeRatesFromApi(apiKey, force).then(data => {
@@ -143,13 +145,20 @@ export const updateData = async (force = false, customApiKey = "") => {
     return result;
 }
 
-export const UpdateApiKey = async (newApiKey: string): Promise<{ ok: boolean, error?: string }> => {
-    const result = await updateData(true, newApiKey);
-    console.log("API Service: UpdateData result:", result);
-    const ok = result.latestSuccess || result.historySuccess;
-    if (!ok) {
-        return { ok: false, error: result.latestError || result.historyError };
+const UpdateApiKey = async (newApiKey: string): Promise<{ ok: boolean, error?: string }> => {
+    const result = await fetch("https://api.exchangeratesapi.io/v1/symbols?access_key=" + newApiKey);
+    if (!result.ok) {
+        return { ok: false, error: result.status.toString() };
     }
+    const symbols = (await result.json()).symbols;
+    const keys = Object.keys(symbols);
+    const symbolsToSave = keys.map(key => ({ code: key, name: symbols[key] }));
     await setApiKey(newApiKey);
     return { ok: true };
+}
+
+export const ApiService = {
+    updateData,
+    UpdateApiKey,
+    getHistoryExchangeRatesFromApi
 }

@@ -1,34 +1,24 @@
 import { Link, router, Stack } from 'expo-router';
-import { Text, View, StyleSheet, TextInput, Alert, useColorScheme } from 'react-native';
+import { Text, View, StyleSheet, TextInput, Alert, useColorScheme, useWindowDimensions, Pressable } from 'react-native';
 import { getApiKey, setHistoryDiapason, getHistoryDiapason } from "@/services/cacheService";
 import React, { useContext, useState } from "react";
 import { errorDescription } from "@/services/helper";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import ToastProvider, { Toast } from "toastify-react-native";
-import * as Network from "expo-network";
-import { UpdateApiKey } from '@/services/apiService';
-import { Image } from "expo-image";
+import { ApiService } from '@/services/ApiService';
 import { ExchangeRateContext } from '@/context/ExchangeRateContext';
+import { NetworkContext } from '@/context/NetworkContext';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 
 export default function ApiKeySettings() {
-    const [networkStatus, setNetworkStatus] = useState({
-        type: Network.NetworkStateType.UNKNOWN,
-        isConnected: false,
-        isInternetReachable: false,
-        isChanged: false
-    });
-
-    Network.getNetworkStateAsync().then(state => {
-        setNetworkStatus({
-            type: state.type ?? Network.NetworkStateType.UNKNOWN,
-            isConnected: state.isConnected ?? false,
-            isInternetReachable: state.isInternetReachable ?? false,
-            isChanged: true
-        });
-    });
     const theme = useColorScheme();
-    const { updateExchangeRate } = useContext(ExchangeRateContext);
+
+    const { isConnected, isChanged, isInternetReachable } = useContext(NetworkContext);
+
+    const { fontScale } = useWindowDimensions();
+
+    const { updateExchangeRate, updateHistoryExchangeRate } = useContext(ExchangeRateContext);
 
     const [apiKey, setApiKeyState] = useState("");
     getApiKey().then(setApiKeyState)
@@ -36,27 +26,48 @@ export default function ApiKeySettings() {
     const [history, setHistory] = useState(0);
     getHistoryDiapason().then(data => data !== 0 ? setHistory(data.history) : setHistory(0));
 
+    const changeDiapasonHandler = (diapason: string) => {
+        const diapasonInNumber = Number.parseInt(diapason.split(" ")[0]);
+        if (history === diapasonInNumber) return;
+        setHistory(diapasonInNumber);
+        setHistoryDiapason(diapasonInNumber).then(result => {
+            if (isChanged && (!isConnected || !isInternetReachable)) {
+                Toast.show({
+                    text1: "Exchange rates will be updated when you have internet connection",
+                    type: "warn",
+                    position: "bottom"
+                });
+                return;
+            }
+            if (!result) {
+                setHistory(0);
+                Alert.alert("Error saving history diapason. Please try again.");
+            }
+            updateHistoryExchangeRate();
+        });
+    }
+
     const [value, setValue] = useState("");
 
-    const colorScheme = useColorScheme();
-
-    const styles = colorScheme === 'light' ? stylesLight : stylesDark;
+    const styles = theme === 'light' ? stylesLight : stylesDark;
     return (
         <View
             style={{
                 flex: 1,
                 alignItems: "center",
-                backgroundColor: colorScheme === 'light' ? "white" : 'black',
+                backgroundColor: theme === 'light' ? "white" : 'black',
             }}>
 
             <Stack.Screen options={{
                 headerRight: () =>
-                    <Image style={{ width: 25, height: 25, padding: 11, alignSelf: "center", alignContent: "center" }}
-                        source={theme === 'light' ? require("@/assets/images/reload-light.png") : require("@/assets/images/reload-dark.png")}
-                        onTouchEnd={updateExchangeRate} />
+                    <Pressable style={{ padding: 4 * fontScale, justifyContent: "center", alignItems: "center" }} onPress={() => {
+                        updateExchangeRate();
+                    }}>
+                        <MaterialCommunityIcons name="refresh" size={2 * fontScale * 14} color={theme === 'light' ? "#4C4C4C" : "#ABABAB"} />
+                    </Pressable>,
             }} />
 
-            <View style={colorScheme === "light" ? {
+            <View style={theme === "light" ? {
                 width: "100%",
                 height: 0.2,
                 backgroundColor: "#4C4C4C",
@@ -67,7 +78,7 @@ export default function ApiKeySettings() {
                 height: 0.2,
                 opacity: 0.5
             }} />
-            <Text style={colorScheme === "light" ? {
+            <Text style={theme === "light" ? {
                 marginTop: 15,
                 fontSize: 19,
                 fontWeight: "semibold",
@@ -85,82 +96,19 @@ export default function ApiKeySettings() {
                 selectedIndex={history === 1 ? 0 : history === 7 ? 1 : history === 30 ? 2 : -1}
                 style={styles.historyContainer}
                 fontStyle={styles.historyValue}
-                backgroundColor={colorScheme === "light" ? "#ffffff" : "#000000"}
-                tintColor={colorScheme === "light" ? "#EFEFEF" : "#272525"}
+                tintColor={theme === 'light' ? "#ABABAB" : "#4C4C4C"}
+                // backgroundColor={theme === 'light' ? "#EFEFEF" : "#272525"}
                 activeFontStyle={styles.historyValue}
-                sliderStyle={{ borderRadius: 10 }}
+                sliderStyle={{ borderRadius: 20 }}
                 tabIndex={-1}
-                onChange={event => {
-                    switch (event.nativeEvent.selectedSegmentIndex) {
-                        case 0: {
-                            if (history === 1) return;
-                            setHistory(1);
-                            setHistoryDiapason(1).then(result => {
-                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
-                                    Toast.show({
-                                        text1: "Exchange rates will be updated when you have internet connection",
-                                        type: "warn",
-                                        position: "bottom"
-                                    });
-                                    return;
-                                }
-                                if (!result) {
-                                    setHistory(0);
-                                    Alert.alert("Error saving history diapason. Please try again.");
-                                }
-                            });
-                            break;
-                        }
-                        case 1: {
-                            if (history === 7) return;
-                            setHistory(7);
-                            setHistoryDiapason(7).then(result => {
-                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
-                                    Toast.show({
-                                        text1: "Exchange rates will be updated when you have internet connection",
-                                        type: "warn",
-                                        position: "bottom"
-                                    });
-                                    return;
-                                }
-                                if (!result) {
-                                    setHistory(0);
-                                    Alert.alert("Error saving history diapason. Please try again.");
-                                }
-                            });
-                            break;
-                        }
-                        case 2: {
-                            if (history === 30) return;
-                            setHistory(30);
-                            setHistoryDiapason(30).then(result => {
-                                if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
-                                    Toast.show({
-                                        text1: "Exchange rates will be updated when you have internet connection",
-                                        type: "warn",
-                                        position: "bottom"
-                                    });
-                                    return;
-                                }
-                                if (!result) {
-                                    setHistory(0);
-                                    Alert.alert("Error saving history diapason. Please try again.");
-                                }
-                            });
-                            break;
-                        }
-                        default: {
-                            Alert.alert("Error", "Unknown history interval selected");
-                        }
-                    }
-                }}
+                onChange={event => changeDiapasonHandler(event.nativeEvent.value)}
             />
 
             <View style={styles.inputContainer}>
                 <TextInput
                     value={value}
                     onChangeText={setValue}
-                    style={colorScheme === "light" ? {
+                    style={theme === "light" ? {
                         paddingLeft: 10,
                         fontSize: 18,
                         justifyContent: "center",
@@ -170,9 +118,9 @@ export default function ApiKeySettings() {
                     keyboardType="default"
                     autoCorrect={false}
                     scrollEnabled={false}
-                    editable={networkStatus.isChanged && !(!networkStatus.isConnected || !networkStatus.isInternetReachable)}
+                    editable={isChanged && !(!isConnected || !isInternetReachable)}
                     onTouchEnd={() => {
-                        if (networkStatus.isChanged && (!networkStatus.isConnected || !networkStatus.isInternetReachable)) {
+                        if (isChanged && (!isConnected || !isInternetReachable)) {
                             Toast.show({
                                 text1: "No internet connection",
                                 type: "error",
@@ -188,7 +136,7 @@ export default function ApiKeySettings() {
                             visibilityTime: 4000,
                             useModal: true
                         })
-                        UpdateApiKey(e.nativeEvent.text)
+                        ApiService.UpdateApiKey(e.nativeEvent.text)
                             .then(result => {
                                 Toast.hide();
                                 if (!result.ok) {
@@ -217,17 +165,17 @@ export default function ApiKeySettings() {
                 />
             </View>
 
-            <Text style={colorScheme === "light" ? { marginTop: "2%", color: "#4C4C4C" } : {
+            <Text style={theme === "light" ? { marginTop: "2%", color: "#4C4C4C" } : {
                 marginTop: "2%",
                 color: "#ABABAB"
             }}>
                 You can get your API key from <Link href={"https://exchangeratesapi.io/"}
-                    style={colorScheme === "light" ? { color: "blue" } : { color: "#6599ff" }}>exchangerates</Link>
+                    style={theme === "light" ? { color: "blue" } : { color: "#6599ff" }}>exchangerates</Link>
             </Text>
             <ToastProvider
                 showCloseIcon={false}
                 position="bottom"
-                theme={colorScheme === "light" ? "light" : "dark"}
+                theme={theme === "light" ? "light" : "dark"}
             />
         </View>
     );
@@ -246,13 +194,10 @@ const stylesLight = StyleSheet.create({
     historyContainer: {
         width: "80%",
         height: "5.8%",
-        backgroundColor: "#ffffff",
-        borderWidth: 1,
-        borderColor: "#EFEFEF",
-        borderRadius: 10,
-        padding: 0,
         marginTop: 5,
-        flexDirection: "row",
+        backgroundColor: "#EFEFEF",
+        borderRadius: 20,
+        padding: 0,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -280,13 +225,9 @@ const stylesDark = StyleSheet.create({
     historyContainer: {
         width: "80%",
         height: "5.8%",
-        backgroundColor: "#000000",
-        borderWidth: 1,
-        borderColor: "#272525",
-        borderRadius: 10,
-        padding: 0,
+        backgroundColor: "#272525",
+        borderRadius: 20,
         marginTop: 5,
-        flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
     },

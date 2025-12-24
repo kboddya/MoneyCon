@@ -1,41 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const changeValue = async (i: string, code: string) => {
+export const setValue = async (values: string[]) => {
     try {
-        switch (i) {
-            case "1": {
-                await AsyncStorage.setItem("firstVal", code);
-                break;
-            }
-            case "2": {
-                await AsyncStorage.setItem("secondVal", code);
-                break;
-            }
-            case "3": {
-                await AsyncStorage.setItem("thirdVal", code);
-                break;
-            }
-            case "4": {
-                await AsyncStorage.setItem("fourthVal", code);
-                break;
-            }
-            default: {
-                return null;
-            }
-        }
+        await AsyncStorage.setItem("currencyValue", JSON.stringify(values));
+        console.log("Cache Service: Currency values saved successfully:", values);
+        return true;
     } catch (e) {
-        console.log("Error saving value:", e);
+        console.log("Cache Service: Error saving currency values:", e);
+        return false;
     }
-};
+}
 
 export const getValue = async () => {
     try {
-        const firstVal = await AsyncStorage.getItem("firstVal");
-        const secondVal = await AsyncStorage.getItem("secondVal");
-        const thirdVal = await AsyncStorage.getItem("thirdVal");
-        const fourthVal = await AsyncStorage.getItem("fourthVal");
-
-        return [firstVal ?? "?", secondVal ?? "?", thirdVal ?? "?", fourthVal ?? "?"];
+        const values = await AsyncStorage.getItem("currencyValue");
+        return values ? JSON.parse(values) : ["C", "C", "C", "C"];
     } catch (e) {
         return ["C", "C", "C", "C"];
     }
@@ -67,10 +46,10 @@ export const getExchangeRates = async () => {
 export const getTime = async () => {
     try {
         const time = await AsyncStorage.getItem("time");
-        return time ? time : "0";
+        return time ? time : null;
     } catch (e) {
         console.log("Cache Service: Error retrieving time:", e);
-        return "0";
+        return null;
     }
 }
 
@@ -87,7 +66,7 @@ export const getApiKey = async () => {
     try {
         const apiKey = await AsyncStorage.getItem("apiKey");
         return apiKey || ""; // Default API key if not set
-    } catch (e) {
+    } catch {
         return ""; // Default API key if retrieval fails
     }
 }

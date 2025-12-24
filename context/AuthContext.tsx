@@ -3,23 +3,23 @@ import { createContext, useState, useEffect, PropsWithChildren, useContext, use 
 import { Toast } from "toastify-react-native";
 import { getApiKey, getLastRequestCode } from "@/services/cacheService";
 import { NetworkContext } from "@/context/NetworkContext";
-import { UpdateApiKey } from "@/services/apiService";
+import { ApiService } from "@/services/ApiService";
 import LoadingModal from "@/components/modals/LoadingModal";
 
 type AuthState = {
     isReady: boolean;
-    apiKey: string | null;
+    apiKey: string | undefined;
     setApiKeyAsync: (key: string | null) => Promise<{ ok: boolean, error?: string }>;
 }
 
 export const AuthContext = createContext<AuthState>({
     isReady: false,
-    apiKey: null,
+    apiKey: undefined,
     setApiKeyAsync: async () => { return { ok: false, error: "Not implemented" } },
 })
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-    const [apiKey, setApiKeyState] = useState<string | null>(null);
+    const [apiKey, setApiKeyState] = useState<string | undefined>(undefined);
 
     const [isReady, setIsReady] = useState(false);
 
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             });
             return { ok: false, error: "Something went wrong" };
         }
-        const result = await UpdateApiKey(key);
+        const result = await ApiService.UpdateApiKey(key);
         console.log("AuthContext: UpdateApiKey result:", result);
         if (!result.ok) {
             setIsInitializing(false);
@@ -74,18 +74,19 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             const key = await getApiKey();
             console.log("AuthContext: Retrieved API key from storage", key);
             if (key === "" || !key) {
-                SplashScreen.hideAsync();
+                setIsReady(true);
                 return;
             }
             const lastRequestCode = await getLastRequestCode();
             console.log("AuthContext: Last request code:", lastRequestCode);
             if (lastRequestCode === 401) {
-                SplashScreen.hideAsync();
+                setIsReady(true);
                 return;
             }
             setApiKeyState(key);
+            setIsReady(true);
         })();
-        setIsReady(true);
+
     }, [isChanged]);
 
     useEffect(() => {

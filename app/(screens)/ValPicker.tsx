@@ -1,8 +1,9 @@
-import { FlatList, View, Text, StyleSheet, useColorScheme } from 'react-native';
-import { Link, useLocalSearchParams } from "expo-router";
-import { changeValue } from "@/services/cacheService";
+import { FlatList, View, Text, StyleSheet, useColorScheme, Pressable } from 'react-native';
+import { useLocalSearchParams, router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import ToastProvider, { Toast } from "toastify-react-native"
+import { useContext } from "react";
+import { ExchangeRateContext } from "@/context/ExchangeRateContext";
 
 const currencies = require("../../assets/currencies.json");
 
@@ -10,20 +11,16 @@ export default function ValPicker() {
 
     const { ID } = useLocalSearchParams();
 
+    const { updateCurrencyValue } = useContext(ExchangeRateContext);
+
     const colorScheme = useColorScheme();
 
     const styles = colorScheme === "light" ? stylesLight : stylesDark
     // @ts-ignore
     const renderItems = useCallback(({ item }) => (
-        <Link onPress={() => changeValue(ID.toString(), item.code).then(res => {
-            if (res === null) {
-                Toast.show({
-                    text1: "Error saving value",
-                    type: "error",
-                    position: "bottom",
-                });
-            }
-        })} dismissTo href={"/"}>
+        <Pressable onPress={() => {
+            updateCurrencyValue(item.code, Number.parseInt(ID.toString()));
+        }}>
             <View style={styles.item}>
                 <View style={styles.fullNamePart}>
                     <Text style={styles.itemText}>{item.fullName}</Text>
@@ -32,7 +29,7 @@ export default function ValPicker() {
                     <Text style={styles.itemText}>{item.code}</Text>
                 </View>
             </View>
-        </Link>
+        </Pressable>
     ), []);
 
     return (

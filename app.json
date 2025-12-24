@@ -8,8 +8,9 @@
     "scheme": "moneycon",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "backgroundColor": "#00000000",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.kboddya.MoneyCon",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -35,10 +36,11 @@
           "image": "./assets/images/logo-by-chatgpt.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#00000000"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
