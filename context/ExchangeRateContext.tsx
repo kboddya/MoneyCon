@@ -1,131 +1,106 @@
 import { createContext, useState, useEffect, PropsWithChildren, useContext } from "react";
 import { NetworkContext } from "./NetworkContext";
 import { ApiService } from "@/services/ApiService";
-import { getTime, getExchangeRates, getHistorycalExchangeRates, getValue, setValue } from "@/services/cacheService";
-import { AuthContext } from "./AuthContext";
-import LoadingModal from "@/components/modals/LoadingModal";
-import { CalcService } from "@/services/CalcService";
-import { router } from "expo-router";
+import { UserCacheService } from "@/services/CacheService";
+import { CurrencyContext } from "@/context/CurrencyContext";
+import { Toast } from "toastify-react-native";
+
 
 type ExchangeRateState = {
-    apiKey: string | undefined;
     exchangeRateUpdateTimestamp: string | null;
     updateExchangeRate: () => Promise<void>;
-    values: string[];
     exchangeRates: { [key: string]: number };
     historycalRates: { [key: string]: string };
-    table: {
-        secondVal: {
-            currentVal: string;
-            percentVal: string;
-        };
-        thirdVal: {
-            currentVal: string;
-            percentVal: string;
-        };
-        fourthVal: {
-            currentVal: string;
-            percentVal: string;
-        };
-    } | null;
-    updateCurrencyValue: (newValue: string, index: number) => Promise<void>;
     updateHistoryExchangeRate: () => Promise<void>;
+    currentCurrencyCodes: string[];
+    updating: boolean;
+    historyDiapason: number;
+    changeDiapasonHandler: (diapason: string) => void;
 }
 
 export const ExchangeRateContext = createContext<ExchangeRateState>({
-    apiKey: undefined,
     exchangeRateUpdateTimestamp: null,
     updateExchangeRate: async () => { },
-    values: ["", "", "", ""],
     exchangeRates: {},
     historycalRates: {},
-    table: null,
-    updateCurrencyValue: async () => { },
-    updateHistoryExchangeRate: async () => { }
+    updateHistoryExchangeRate: async () => { },
+    currentCurrencyCodes: [],
+    updating: false,
+    historyDiapason: 0,
+    changeDiapasonHandler: () => { },
 })
 
 export const ExchangeRateProvider = ({ children }: PropsWithChildren) => {
+    const { isConnected, isChanged, type, isInternetReachable } = useContext(NetworkContext);
+    const { currentCurrencyCodes } = useContext(CurrencyContext);
+
     const [exchangeRateUpdateTimestamp, setExchangeRateUpdateTimestamp] = useState<string | null>(null);
-
-    const [values, setValues] = useState(["", "", "", ""]);
-
-    const [table, setTable] = useState<{
-        secondVal: {
-            currentVal: string,
-            percentVal: string
-        },
-        thirdVal: {
-            currentVal: string,
-            percentVal: string
-        },
-        fourthVal: {
-            currentVal: string,
-            percentVal: string
-        },
-    } | null>(null)
-
-
     const [exchangeRates, setExchangeRates] = useState<{ [key: string]: number }>({});
     const [historycalRates, setHistorycalRates] = useState<{ [key: string]: string }>({});
 
-    useEffect(() => {
-        if (values.includes("") || values.includes("C")) return;
-
-        CalcService.exchangeRateTable(values, exchangeRates, historycalRates).then(data => {
-            setTable(data ?? {
-                secondVal: {
-                    currentVal: "",
-                    percentVal: ""
-                },
-                thirdVal: {
-                    currentVal: "",
-                    percentVal: ""
-                },
-                fourthVal: {
-                    currentVal: "",
-                    percentVal: ""
-                },
-            });
-        }
-        )
-    }, [values, exchangeRateUpdateTimestamp, historycalRates]);
-
-    const updateHistoryExchangeRate = async () => {
-        await ApiService.getHistoryExchangeRatesFromApi(apiKey);
-        await loadExchangeRatesFromCache();
-    }
-
-    const { isConnected, isChanged, type } = useContext(NetworkContext);
-    const { apiKey } = useContext(AuthContext);
-
     const [updating, setUpdating] = useState(false);
 
+
+    const [historyDiapason, setHistory] = useState(0);
+    UserCacheService.getHistoryDiapason().then(data => data !== 0 ? setHistory(data.history) : setHistory(0));
+
+    const changeDiapasonHandler = (diapason: string) => {
+        const diapasonInNumber = Number.parseInt(diapason.split(" ")[0]);
+        if (historyDiapason === diapasonInNumber) return;
+        setHistory(diapasonInNumber);
+        UserCacheService.setHistoryDiapason(diapasonInNumber).then(result => {
+            if (isChanged && (!isConnected || !isInternetReachable)) {
+                Toast.show({
+                    text1: "Exchange rates will be updated when you have internet connection",
+                    type: "warn",
+                    position: "bottom"
+                });
+                return;
+            }
+            updateHistoryExchangeRate();
+        });
+    }
+
     const updateExchangeRate = async (force = true) => {
-        if (force) setUpdating(true);
-        const timestamp = await getTime();
+        const timestamp = await UserCacheService.getTime();
         setExchangeRateUpdateTimestamp(timestamp);
-        if (!isConnected || !apiKey) return;
+        if (!isConnected) {
+            if (!force) return;
+            return Toast.show({
+                text1: "No internet connection",
+                text2: "Check your network settings and try again",
+                type: "error",
+            });
+        }
+        setUpdating(true);
         const result = await ApiService.updateData(force);
         if (result.latestSuccess) {
-            const newTimestamp = await getTime();
+            const newTimestamp = await UserCacheService.getTime();
             setExchangeRateUpdateTimestamp(newTimestamp);
         }
+        if (!result.latestSuccess && force) {
+            console.log("Error", result.latestError)
+            Toast.show({
+                text1: "Something went wrong",
+                text2: "Try again later",
+                type: "error",
+            })
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000))
         setUpdating(false);
     }
 
-    const updateCurrencyValue = async (newValue: string, index: number) => {
-        router.back();
-        const currentValues = [...values];
-        currentValues[index] = newValue;
-        setValues(currentValues);
-        setValue(currentValues);
+    const updateHistoryExchangeRate = async () => {
+        await ApiService.getHistoryExchangeRatesFromApi();
+        await loadExchangeRatesFromCache();
     }
 
     const loadExchangeRatesFromCache = async () => {
-        const exchangeRates = await getExchangeRates();
+        const exchangeRates = await UserCacheService.getExchangeRates();
         console.log("Loaded exchange rates from cache:", exchangeRates);
-        setExchangeRates(exchangeRates?.rates);
-        const historycalRates = await getHistorycalExchangeRates();
+        if (!exchangeRates) return;
+        setExchangeRates(exchangeRates);
+        const historycalRates = await UserCacheService.getHistorycalExchangeRates();
         setHistorycalRates(historycalRates);
     }
 
@@ -139,27 +114,21 @@ export const ExchangeRateProvider = ({ children }: PropsWithChildren) => {
         })();
     }, [isConnected, isChanged, type])
 
-    useEffect(() => {
-        loadExchangeRatesFromCache();
-        getValue().then(setValues);
-    }, [])
-
     const value = {
-        apiKey,
         exchangeRateUpdateTimestamp,
         updateExchangeRate,
-        values,
         exchangeRates,
         historycalRates,
-        table,
-        updateCurrencyValue,
-        updateHistoryExchangeRate
+        updateHistoryExchangeRate,
+        currentCurrencyCodes,
+        updating,
+        historyDiapason,
+        changeDiapasonHandler,
     }
 
     return (
         <ExchangeRateContext.Provider value={value}>
             {children}
-            <LoadingModal visible={updating} />
         </ExchangeRateContext.Provider>
     )
 }

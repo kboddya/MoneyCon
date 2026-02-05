@@ -26,7 +26,6 @@ npx expo start
 ```
 You can then scan the QR code with the expo app on your phone or run the app in an emulator.
 ## License Notices
-Icons by [Icons8](https://icons8.com/)\
 Logo by [ChatGPT](https://chatgpt.com/)\
 Powered by [exchangeratesapi.io](https://exchangeratesapi.io/)
 ## LICENSE

@@ -2,13 +2,12 @@
   "expo": {
     "name": "MoneyCon",
     "slug": "MoneyCon",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo-by-chatgpt.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "moneycon",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "backgroundColor": "#00000000",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.kboddya.MoneyCon",
@@ -18,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo-by-chatgpt.png"
+        "foregroundImage": "./assets/images/SplashScreen.png"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.kboddya.MoneyCon"
@@ -26,17 +25,16 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/logo-by-chatgpt.png"
+      "favicon": "./assets/images/SplashScreen.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo-by-chatgpt.png",
+          "image": "./assets/images/SplashScreen.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#00000000"
+          "resizeMode": "contain"
         }
       ],
       "expo-font",

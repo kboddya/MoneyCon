@@ -23,9 +23,9 @@ export const NetworkProvider = ({ children }: PropsWithChildren) => {
         isInternetReachable: null,
         isChanged: false
     });
-    console.log("Network Context: Subscribing to network status changes");
     useEffect(() => {
         (async () => {
+            setNetworkStatus(prev => ({ ...prev, isChanged: false }));
             const status = await Network.getNetworkStateAsync();
             setNetworkStatus({
                 type: status.type ?? Network.NetworkStateType.UNKNOWN,
@@ -35,6 +35,7 @@ export const NetworkProvider = ({ children }: PropsWithChildren) => {
             });
         })();
         const subscription = Network.addNetworkStateListener((state) => {
+            setNetworkStatus(prev => ({ ...prev, isChanged: false }));
             setNetworkStatus({
                 type: state.type ?? Network.NetworkStateType.UNKNOWN,
                 isConnected: state.isConnected ?? false,

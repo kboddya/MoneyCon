@@ -1,89 +1,85 @@
-import {
-    getApiKey,
-    getExchangeRates,
-    getHistorycalExchangeRates,
-    getHistoryDiapason,
-    getTime,
-    updateExchangeRates,
-    updateHistorycalExchangeRates,
-    setLastRequestCode,
-    setApiKey
-} from "@/services/cacheService";
-import { UpdateDataResult } from "@/entities/UpdateDataResult";
+import { ApiCacheService } from "@/services/CacheService";
 
+const mainSource = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@";
+const endOfReserveSource = ".currency-api.pages.dev/v1/";
 
-let exchangeRatesInWork = false;
-const getExchangeRatesFromApi = async (apiKey: string, force = false) => {
-    return getTime().then(async date => {
-        const currentDate = new Date(Date.now()).toDateString()
-        const lastUpdateDate = new Date(Date.parse(date));
-        if (((isNaN(lastUpdateDate.getDate()) || currentDate !== lastUpdateDate.toDateString()) || force) && !exchangeRatesInWork) {
-            exchangeRatesInWork = true;
-            try {
-                const response = await fetch("https://api.exchangeratesapi.io/v1/latest?access_key=" + apiKey);
-                if (!response.ok) {
-                    throw new Error(response.status.toString());
-                }
-
-                const data = await response.json();
-                if (data.success) {
-                    const rates = JSON.stringify(data.rates);
-                    console.log("Exchange rates fetched successfully:", rates);
-                    const result = await updateExchangeRates(rates);
-                    exchangeRatesInWork = false;
-                    return result;
-                } else {
-                    console.error(`Error ${data.error.code}: ${data.error.info}`);
-                    throw data.error;
-                }
-            } catch (error) {
-                exchangeRatesInWork = false;
-                setLastRequestCode(error as string)
-                return error; // Error code for fetching exchange rates
-            }
-        }
-    })
+let fetchInWork = false
+const getDataFromApi = async (date: string, endpoint: string): Promise<{ [key: string]: number } | { [key: string]: string }> => {
+    if (fetchInWork) await new Promise(resolve => setTimeout(resolve, 1000));
+    if (fetchInWork) return { errorCode: "Fetch in work" };
+    fetchInWork = true;
+    try {
+        let response = await fetch(mainSource + date + "/v1/" + endpoint + ".min.json");
+        if (response.ok) {
+            fetchInWork = false;
+            return await response.json()
+        };
+        response = await fetch("https://" + date + endOfReserveSource + endpoint + ".min.json");
+        if (response.ok) {
+            fetchInWork = false;
+            return await response.json()
+        };
+        response = await fetch(mainSource + date + "/v1/" + endpoint + ".json");
+        if (response.ok) {
+            fetchInWork = false;
+            return await response.json()
+        };
+        response = await fetch("https://" + date + endOfReserveSource + endpoint + ".json");
+        if (response.ok) {
+            fetchInWork = false;
+            return await response.json()
+        };
+        throw new Error(response.status.toString());
+    } catch (error) {
+        console.warn("API Service: Error fetching data from API:", error);
+        fetchInWork = false;
+        return { errorCode: error as string };
+    }
 }
 
-let historyInWork = false;
-const getHistoryExchangeRatesFromApi = async (apiKey: string | undefined, force = false) => {
-    if (!apiKey) return
-    try {
-        const exchange = await getHistorycalExchangeRates().then(data => data ? data : null);
-        const historyDiapason = await getHistoryDiapason().then(data => {
-            if (typeof data === "number") return data;
-            else return data.history; // Default history diapason if not set
-        });
-
-        if (!historyInWork && historyDiapason != 0 && (force || (exchange !== null && (exchange?.time !== new Date(Date.now()).toDateString())) || (exchange?.diapason !== historyDiapason.toString()))) {
-            historyInWork = true;
-            const date = new Date(Date.now() - (historyDiapason * 24 * 60 * 60 * 1000));
-            const response = await fetch("https://api.exchangeratesapi.io/v1/" + (date.getFullYear().toString() + "-" + ((date.getMonth() + 1).toString().length === 1 ? "0" + (date.getMonth() + 1).toString() : (date.getMonth() + 1).toString()) + "-" + (date.getDate().toString().length === 1 ? "0" + date.getDate().toString() : date.getDate().toString())) + "?access_key=" + apiKey);
-
-            if (!response.ok) {
-                throw new Error(response.status.toString());
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                const rates = JSON.stringify(data.rates);
-                console.log("History exchange rates fetched successfully:", rates);
-                historyInWork = false;
-                return await updateHistorycalExchangeRates(JSON.stringify({
-                    rates: rates,
-                    time: new Date(Date.now()).toDateString(),
-                    diapason: historyDiapason.toString()
-                }));
-            } else {
-                throw data.error;
-            }
+const getExchangeRatesFromApi = async (force = false) => {
+    const timestamp = await ApiCacheService.getTime();
+    const currentDate = new Date(Date.now()).toDateString();
+    const lastUpdateDate = new Date(Date.parse(timestamp ?? new Date(0).toDateString()));
+    if ((isNaN(lastUpdateDate.getDate()) || currentDate !== lastUpdateDate.toDateString()) || force) {
+        const response = await getDataFromApi("latest", "currencies/eur");
+        console.log("API Service: Fetched exchange rates response:", response);
+        if (response.errorCode) {
+            console.log("API Service: Error fetching exchange rates:", response.errorCode);
+            return response.errorCode; // Error code for fetching exchange rates
         }
-    } catch (error) {
-        historyInWork = false;
-        console.log("API Service: Error fetching history exchange rates:", error);
-        setLastRequestCode(error as string)
-        return error; // Error code for fetching history exchange rates
+        const rates = JSON.stringify(response.eur);
+        console.log("Exchange rates fetched successfully:", rates);
+        await ApiCacheService.updateExchangeRates(rates);
+        return 200;
+    }
+}
+
+const getHistoryExchangeRatesFromApi = async (force = false) => {
+    const exchange = await ApiCacheService.getHistorycalExchangeRates().then(data => data ? data : null);
+    const historyDiapason = await ApiCacheService.getHistoryDiapason().then(data => {
+        if (typeof data === "number") return data;
+        else return data.history; // Default history diapason if not set
+    });
+
+    if (historyDiapason != 0 && (force || (exchange !== null && (exchange?.date !== new Date(Date.now()).toDateString())) || (exchange?.diapason !== historyDiapason.toString()))) {
+        const date = new Date(Date.now() - (historyDiapason * 24 * 60 * 60 * 1000));
+        console.log("Fetching history exchange rates for date:", date);
+        const stringDate = date.getFullYear().toString() + "-" + ((date.getMonth() + 1).toString().length === 1 ? "0" + (date.getMonth() + 1).toString() : (date.getMonth() + 1).toString()) + "-" + (date.getDate().toString().length === 1 ? "0" + date.getDate().toString() : date.getDate().toString());
+        const response = await getDataFromApi(stringDate, "currencies/eur");
+        if (response.errorCode) {
+            console.log("API Service: Error fetching history exchange rates:", response.errorCode);
+            return response.errorCode; // Error code for fetching history exchange rates
+        }
+
+        const rates = JSON.stringify(response.eur);
+        console.log("History exchange rates fetched successfully:", rates);
+        await ApiCacheService.updateHistorycalExchangeRates(JSON.stringify({
+            rates,
+            date: new Date(Date.now()).toDateString(),
+            diapason: historyDiapason.toString()
+        }));
+        return 200;
     }
 }
 
@@ -94,71 +90,54 @@ const getHistoryExchangeRatesFromApi = async (apiKey: string | undefined, force 
 *@returns  {Promise<{latestSuccess: boolean, latestError: string, historySuccess: boolean, historyError: string}>}
 **/
 const updateData = async (force = false, customApiKey = "") => {
-
-    const apiKey = customApiKey != "" ? customApiKey : await getApiKey();
-    const exchangeRates = await getExchangeRates();
-    const historyExchangeRates = (await getHistorycalExchangeRates())?.rates;
+    const historyExchangeRates = (await ApiCacheService.getHistorycalExchangeRates())?.rates;
 
     let result: UpdateDataResult = { latestSuccess: true, historySuccess: true } as UpdateDataResult;
 
-    if (!apiKey) {
-        result.latestError = "101";
-        if (exchangeRates?.rates !== null) result.latestError += " 1000";
+    const latestResponseCode = await getExchangeRatesFromApi(force);
+    if (latestResponseCode !== 200 && latestResponseCode !== undefined) {
         result.latestSuccess = false;
-        return result;
+        result.latestError = `Error code: ${latestResponseCode}`;
     }
 
-    if (!exchangeRatesInWork) {
-        try {
-            await getExchangeRatesFromApi(apiKey, force).then(data => {
-                if (typeof data === "object") {
-                    if (exchangeRates?.rates !== null && customApiKey !== "") throw new Error((data?.toString() + " 1000"));
-                    throw new Error(data?.toString());
-                }
-            })
-        } catch (Error) {
-            console.error("API Service: Error fetching exchange rates:", Error);
-            result.latestError += Error as string;
-            result.latestSuccess = false;
-        }
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (!historyInWork) {
-        try {
-            await getHistoryExchangeRatesFromApi(apiKey, force).then(data => {
-                if (typeof data === "object") {
-                    if (historyExchangeRates?.rates !== null && customApiKey !== "") throw new Error((data?.toString() + " 1000"));
-                    throw new Error(data?.toString());
-                }
-            })
-
-        } catch (Error) {
-            console.error("API Service: Error fetching history exchange rates:", Error);
-            if (result.historyError !== "") result.historyError += "\n";
-            result.historyError += Error as string;
-            result.historySuccess = false;
-        }
+    const historyResponseCode = await getHistoryExchangeRatesFromApi(force);
+    if (historyResponseCode !== 200 && historyResponseCode !== undefined) {
+        result.historySuccess = false;
+        result.historyError = `Error code: ${historyResponseCode}`;
     }
 
     return result;
 }
 
-const UpdateApiKey = async (newApiKey: string): Promise<{ ok: boolean, error?: string }> => {
-    const result = await fetch("https://api.exchangeratesapi.io/v1/symbols?access_key=" + newApiKey);
-    if (!result.ok) {
-        return { ok: false, error: result.status.toString() };
+
+
+const updateCurrencyList = async () => {
+    const response = await getDataFromApi("latest", "currencies");
+    console.log("API Service: Fetched currency list response:", response);
+    if (response.errorCode) {
+        console.log("API Service: Error fetching currency list:", response.errorCode);
+        return response.errorCode; // Error code for fetching currency list
     }
-    const symbols = (await result.json()).symbols;
-    const keys = Object.keys(symbols);
-    const symbolsToSave = keys.map(key => ({ code: key, name: symbols[key] }));
-    await setApiKey(newApiKey);
-    return { ok: true };
+
+    const currencies = response;
+    const currenciesArray = Object.entries(currencies);
+
+    await ApiCacheService.setCurrencyList(currenciesArray);
+    console.log("Currency list fetched and saved successfully.");
+    return 200;
 }
 
-export const ApiService = {
-    updateData,
-    UpdateApiKey,
-    getHistoryExchangeRatesFromApi
+type UpdateDataResult = {
+    latestSuccess: boolean;
+    latestError?: string;
+    historySuccess: boolean;
+    historyError?: string;
 }
+
+const ApiService = {
+    updateData,
+    getHistoryExchangeRatesFromApi,
+    updateCurrencyList
+}
+
+export { ApiService, UpdateDataResult }
