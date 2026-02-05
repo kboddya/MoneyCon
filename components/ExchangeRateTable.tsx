@@ -24,7 +24,6 @@ const ExchangeRateTable = memo((props: ExchangeRateTableProps) => {
         <View style={[
             style.container,
             {
-                maxHeight: 50 * windowDimensions.fontScale,
                 maxWidth: 330 * windowDimensions.fontScale,
             },
             theme.containerBG as ViewStyle,

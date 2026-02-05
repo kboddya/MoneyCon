@@ -93,7 +93,6 @@ export default function Index() {
 
                 {historyDiapason !== 0 && <ExchangeRateTable table={table} mainCurrencyCode={currentCurrencyCodes[0]} />}
             </ScrollView>
-            <SafeAreaView edges={["bottom"]} />
         </View >
     );
 }
