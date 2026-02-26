@@ -9,7 +9,7 @@
 ## About
 MoneyCon is a simple currency converter that allows you to convert one currency to another using the latest exchange rates.
 Built with TS, React Native and expo, it is a cross-platform app that works on both iOS and Android.
-For the backend, it uses the <a href="https://exchangeratesapi.io/">exchangeratesapi.io</a> API to get the latest and historical exchange rates.
+For the backend, it uses the <a href="https://github.com/fawazahmed0/exchange-api">exchange-api</a> API to get the latest and historical exchange rates.
 ## Screenshots
 |                                                               |                      <h3>Light mode</h3>                      |                                                               |
 |:-------------------------------------------------------------:|:-------------------------------------------------------------:|:-------------------------------------------------------------:|
