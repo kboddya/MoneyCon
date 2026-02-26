@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/images/logo-by-chatgpt.png" width="150" height="150"/>
+    <img src="assets/images/SplashScreen.png" width="150" height="150"/>
     <h1>MoneyCon</h1>
     <p>MoneyCon is a simple way to convert on currency to another!</p>
     <p>Built with <a href="https://reactnative.dev/">React Native</a> and <a href="https://expo.dev/">Expo</a></p>
@@ -27,6 +27,6 @@ npx expo start
 You can then scan the QR code with the expo app on your phone or run the app in an emulator.
 ## License Notices
 Logo by [ChatGPT](https://chatgpt.com/)\
-Powered by [exchangeratesapi.io](https://exchangeratesapi.io/)
+Powered by [exchange-api](https://github.com/fawazahmed0/exchange-api)
 ## LICENSE
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
