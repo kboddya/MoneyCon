@@ -2,12 +2,11 @@
   "expo": {
     "name": "MoneyCon",
     "slug": "MoneyCon",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "scheme": "moneycon",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.kboddya.MoneyCon",
@@ -19,8 +18,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/SplashScreen.png"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.kboddya.MoneyCon"
+      "package": "com.kboddya.MoneyCon",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "bundler": "metro",
@@ -37,8 +36,7 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-font",
-      "expo-web-browser"
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
