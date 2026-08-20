@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { router, useLocalSearchParams } from "expo-router";
 import CurrencyList from '@/features/currencyList/components/CurrencyList';
 import { useThemeContext } from '@/context/ThemeContext';
-import useCurrencyContext from '@/stores/CurrencyStore';
+import { useCurrencyStore } from '@/stores';
 import useCurrencySearch from '@/features/currencyList/hooks/useCurrencySearch';
 import { useHeaderHeight } from "expo-router/react-navigation"
 import HeaderWithSearch from '@/features/currencyList/components/HeaderWithSearch';
@@ -13,7 +13,7 @@ export default function ValPicker() {
     const { colors } = useThemeContext();
 
 
-    const { selectCurrencyValue } = useCurrencyContext();
+    const { selectCurrencyValue } = useCurrencyStore();
 
     const { currencyList, searchedData, searchHandler } = useCurrencySearch();
 

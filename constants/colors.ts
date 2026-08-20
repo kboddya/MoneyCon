@@ -11,7 +11,7 @@ const lightColors = {
     headerTint: "#4C4C4C",
     segmentControlBg: "#EEEEF0",
     segmentControlTint: "#ABABAB",
-    segmentControlActive: "#182424"
+    segmentControlActive: "#182424",
 } as const;
 
 const darkColors = {
@@ -24,7 +24,7 @@ const darkColors = {
     headerTint: "#ABABAB",
     segmentControlBg: "#1C1C1F",
     segmentControlTint: "#4C4C4C",
-    segmentControlActive: "#ABABAB"
+    segmentControlActive: "#ABABAB",
 } as const;
 
 export type colorProperties = keyof typeof lightColors | keyof typeof darkColors;

@@ -1,26 +1,33 @@
-import { RefreshControl, ScrollView } from "react-native";
-import ExchangeRateTable from "@/features/currencyConvertor/components/ExchangeRateTable";
-import UpdateAt from "@/features/currencyConvertor/components/UpdateAt";
-import CurrencyConvertorRows from "@/features/currencyConvertor/components/CurrencyRow";
+import { Platform, RefreshControl, ScrollView } from "react-native";
 import HeaderTitle from "@/components/common/HeaderTitle";
 import PageContainer from "@/components/common/PageContainer";
-import useExchangeRateContext from "@/stores/ExchangeRateStore";
-import Toolbar from "@/features/currencyConvertor/components/Toolbar";
+import ExchangeRateTable from "@/features/exchangeRateTable";
+import CurrencyConvertorRows from "@/features/currencyCalculate";
+import UpdateAt from "@/features/updateAt";
+import useRatesUpdater from "@/hooks/useRatesUpdater";
+import { router, Stack } from "expo-router";
+import MoreHoriz from "@expo/material-symbols/more_horiz.xml";
+
 
 
 export default function Index() {
-    const { isLoading, updateExchangeRate } = useExchangeRateContext();
+    const [isLoading, updateExchangeRates] = useRatesUpdater()
     return (
         <PageContainer>
             <HeaderTitle title={"MoneyCon"} />
-            <Toolbar />
+            <Stack.Toolbar placement="right">
+                <Stack.Toolbar.Button
+                    icon={Platform.OS === "android" ? MoreHoriz : 'ellipsis'}
+                    onPress={() => router.push("/Settings")}
+                />
+            </Stack.Toolbar>
             <ScrollView
-                contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+                contentContainerStyle={{ flexGrow: 1, alignItems: "center", paddingHorizontal: "7%" }}
                 keyboardDismissMode={"interactive"}
                 refreshControl={
                     <RefreshControl
                         refreshing={isLoading}
-                        onRefresh={() => updateExchangeRate()}
+                        onRefresh={updateExchangeRates}
                     />
                 }
             >

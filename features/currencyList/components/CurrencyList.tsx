@@ -1,7 +1,7 @@
-import { VirtualizedList, Text, Pressable, StyleSheet, View, TextStyle } from "react-native";
+import { VirtualizedList, Text, Pressable, StyleSheet, View } from "react-native";
 import { useCallback, memo } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
-import useCurrencyContext from "@/stores/CurrencyStore";
+import { useCurrencyStore } from "@/stores";
 import { sizes } from "@/constants/sizes";
 import RefreshCurrencyList from "./RefreshCurrencyList";
 import ListFooter from "./ListFooter";
@@ -15,10 +15,10 @@ type CurrencyList = {
 
 const CurrencyList = memo(({ data, onSelect, isSearching }: CurrencyList) => {
     const { colors } = useThemeContext();
-    const { selectedCurrencyCodes } = useCurrencyContext()
+    const { selectedCurrencyCodes } = useCurrencyStore()
 
     const renderFunction = useCallback(({ item }: { item: string[] }) => {
-        const isSelected = selectedCurrencyCodes.includes(item[0].toUpperCase());
+        const isSelected = selectedCurrencyCodes.includes(item[0]);
         return (
             <Pressable
                 onPress={() => onSelect(item)}

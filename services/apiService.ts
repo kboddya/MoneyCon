@@ -52,17 +52,10 @@ const apiClient = <T>(date: string, endpoint: string): Promise<T> => {
   return request as Promise<T>;
 };
 
-const getExchangeRatesFromApi = (): Promise<ExchangeRatesResponse> =>
-  apiClient<ExchangeRatesResponse>("latest", "currencies/eur");
-
-const getHistoryExchangeRatesFromApi = (
-  diapason: number,
-): Promise<ExchangeRatesResponse> => {
-  if (diapason === 0) return apiClient<ExchangeRatesResponse>("latest", "currencies/eur");
-  const date = addDays(new Date(), -diapason);
-  const stringDate = generateStringDate(date);
+const getExchangeRatesFromApi = (diapason: number = 0): Promise<ExchangeRatesResponse> => {
+  const stringDate = !!diapason ? "latest" : generateStringDate(addDays(new Date(), -diapason));
   return apiClient<ExchangeRatesResponse>(stringDate, "currencies/eur");
-};
+}
 
 const getCurrencyList = (): Promise<CurrencyListResponse> => {
   return apiClient<CurrencyListResponse>("latest", "currencies");
@@ -70,7 +63,6 @@ const getCurrencyList = (): Promise<CurrencyListResponse> => {
 
 export {
   getExchangeRatesFromApi,
-  getHistoryExchangeRatesFromApi,
   getCurrencyList,
 };
 export type { ExchangeRatesResponse, CurrencyListResponse };

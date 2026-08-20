@@ -3,14 +3,13 @@ import ChangeButton from "./ChangeButton";
 import CurrentCount from "./CurrentCount";
 
 interface CounterProps {
-    defaultValue: number;
     onChange: (val: number) => void;
     currentValue: number
     maxValue?: number;
     minValue?: number;
 }
 
-function Counter({ defaultValue, onChange, currentValue, maxValue, minValue }: CounterProps) {
+function Counter({ onChange, currentValue, maxValue, minValue }: CounterProps) {
     const cannotBeLess = currentValue <= (minValue ?? -Infinity);
     const cannotBeMode = currentValue >= (maxValue ?? +Infinity);
     return (

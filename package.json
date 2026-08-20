@@ -21,6 +21,7 @@
     "@react-navigation/native": "^7.1.8",
     "@types/react-native-table-component": "^1.2.9",
     "expo": "~57.0.11",
+    "expo-blur": "~57.0.2",
     "expo-constants": "~57.0.9",
     "expo-font": "~57.0.1",
     "expo-haptics": "~57.0.1",
@@ -57,5 +58,9 @@
     "pod-install": "^0.3.10",
     "typescript": "~6.0.3"
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "dtrace-provider@0.8.8": true,
+    "unrs-resolver@1.12.2": true
+  }
 }

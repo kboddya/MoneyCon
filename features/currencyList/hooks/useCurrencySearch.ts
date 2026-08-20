@@ -1,8 +1,8 @@
-import useExchangeRateContext from "@/stores/ExchangeRateStore";
+import { useCurrencyStore } from "@/stores";
 import { useState } from "react";
 
 function useCurrencySearch() {
-    const { currencyList } = useExchangeRateContext();
+    const { currencyList } = useCurrencyStore();
 
     const [searchingResult, setSearchingResult] = useState<string[][] | undefined>(undefined);
 

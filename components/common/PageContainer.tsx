@@ -15,8 +15,6 @@ function PageContainer({ children }: { children: ReactNode }) {
         }} edges={["bottom"]}>
             <KeyboardAvoidingView behavior={"padding"}
                 style={{ flex: 1 }}
-                contentContainerStyle={{
-                }}
             >
                 {children}
             </KeyboardAvoidingView>

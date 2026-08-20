@@ -1,10 +1,10 @@
 import { sizes } from "@/constants/sizes";
 import { useThemeContext } from "@/context/ThemeContext";
-import useExchangeRateContext from "@/stores/ExchangeRateStore";
+import useRatesUpdater from "@/hooks/useRatesUpdater";
 import { View, Text, Pressable } from "react-native";
 
 function RefreshCurrencyList() {
-    const { updateExchangeRate } = useExchangeRateContext()
+    const [isLoading, updateExchangeRate] = useRatesUpdater()
     const { colors } = useThemeContext()
 
     return (
@@ -19,7 +19,7 @@ function RefreshCurrencyList() {
             >
                 Could't load currency list
             </Text>
-            <Pressable onPress={updateExchangeRate}>
+            <Pressable onPress={() => updateExchangeRate()} disabled={isLoading}>
                 <Text
                     style={{
                         color: colors?.mainText,

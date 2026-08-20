@@ -1,0 +1,1 @@
+export type ExchangeRateType = { [key: string]: number; }
