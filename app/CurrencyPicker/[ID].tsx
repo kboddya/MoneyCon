@@ -1,50 +1,49 @@
-import { View } from 'react-native';
 import { router, useLocalSearchParams } from "expo-router";
-import CurrencyList from '@/features/currencyList/components/CurrencyList';
-import { useThemeContext } from '@/context/ThemeContext';
-import { useCurrencyStore } from '@/stores';
-import useCurrencySearch from '@/features/currencyList/hooks/useCurrencySearch';
-import { useHeaderHeight } from "expo-router/react-navigation"
-import HeaderWithSearch from '@/features/currencyList/components/HeaderWithSearch';
+import { useHeaderHeight } from "expo-router/react-navigation";
+import HeaderWithSearch from "@/components/common/HeaderWithSearch";
+import PageContainer from "@/components/common/PageContainer";
+import { useThemeContext } from "@/context/ThemeContext";
+import CurrencyList from "@/features/currencyList/";
+import useCurrencySearch from "@/features/currencyList/hooks/useCurrencySearch";
+import { useCurrencyStore } from "@/stores";
 
 export default function ValPicker() {
-    const params = useLocalSearchParams() as { ID?: string };
+	const params = useLocalSearchParams() as { ID?: string };
 
-    const { colors } = useThemeContext();
+	const { colors } = useThemeContext();
 
+	const { selectCurrencyValue } = useCurrencyStore();
 
-    const { selectCurrencyValue } = useCurrencyStore();
+	const { currencyList, searchedData, searchHandler } = useCurrencySearch();
 
-    const { currencyList, searchedData, searchHandler } = useCurrencySearch();
+	const headerHeight = useHeaderHeight();
 
-    const headerHeight = useHeaderHeight();
+	const ID = params?.ID ?? 0;
 
-    const ID = params?.ID ?? 0;
+	const idInInt = Number(ID ?? NaN);
 
-    const idInInt = Number(ID ?? NaN);
+	const onSelectHandler = (toUpdate: string[]): void => {
+		if (!Number.isNaN(idInInt)) {
+			selectCurrencyValue(toUpdate[0], idInInt);
+		}
+		return router.back();
+	};
 
-    const onSelectHandler = (toUpdate: string[]): void => {
-        if (!Number.isNaN(idInInt)) {
-            selectCurrencyValue(toUpdate[0], idInInt);
-        }
-        return router.back();
-    }
-
-
-    return (
-        <View style={{
-            flex: 1,
-            backgroundColor: colors.appColor,
-            paddingTop: headerHeight,
-            alignItems: "center"
-        }}
-        >
-            <HeaderWithSearch searchHandler={searchHandler} searchable={!!currencyList?.length} />
-            {currencyList && <CurrencyList
-                data={searchedData !== undefined ? searchedData : currencyList}
-                onSelect={onSelectHandler}
-                isSearching={searchedData !== undefined}
-            />}
-        </View>
-    );
+	return (
+		<PageContainer blurEdges={["top"]} style={{ alignItems: "center" }}>
+			<HeaderWithSearch
+				title="Select currency"
+				searchPlaceholder="Search currency..."
+				searchHandler={searchHandler}
+				searchable={!!currencyList?.length}
+			/>
+			{currencyList && (
+				<CurrencyList
+					data={searchedData !== undefined ? searchedData : currencyList}
+					onSelect={onSelectHandler}
+					isSearching={searchedData !== undefined}
+				/>
+			)}
+		</PageContainer>
+	);
 }

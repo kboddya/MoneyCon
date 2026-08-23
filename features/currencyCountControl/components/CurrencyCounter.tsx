@@ -4,20 +4,21 @@ import SettingsSectionHeader from "@/components/ui/Settings/SettingsSectionHeade
 import useCurrencyCount from "../hooks/useCurrencyCount";
 
 function CurrencyCounter() {
-    const [count, max, onChange] = useCurrencyCount();
-    return (
-        <SettingsParameterContainer>
-            <SettingsSectionHeader isResetable={count !== 4} onReset={onChange}>
-                Currency count
-            </SettingsSectionHeader>
-            <Counter
-                onChange={onChange}
-                currentValue={count}
-                minValue={2}
-                maxValue={max}
-            />
-        </SettingsParameterContainer>
-    );
+	const { count, maxValue, addCurrencyCountHandler, resetCounter } =
+		useCurrencyCount();
+	return (
+		<SettingsParameterContainer>
+			<SettingsSectionHeader isResetable={count !== 4} onReset={resetCounter}>
+				Currency count
+			</SettingsSectionHeader>
+			<Counter
+				onChange={addCurrencyCountHandler}
+				currentValue={count}
+				minValue={2}
+				maxValue={maxValue}
+			/>
+		</SettingsParameterContainer>
+	);
 }
 
 export default CurrencyCounter;
